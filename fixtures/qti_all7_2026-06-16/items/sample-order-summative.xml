@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="sample-order-summative" title="OrderInteraction" adaptive="false" time-dependent="false" tool-name="incept-qti-sdk" tool-version="0.5.7">
+  <qti-response-declaration identifier="RESPONSE" cardinality="ordered" base-type="identifier">
+    <qti-correct-response>
+      <qti-value>magna_carta</qti-value>
+      <qti-value>printing</qti-value>
+      <qti-value>columbus</qti-value>
+      <qti-value>declaration</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="MAXSCORE" cardinality="single" base-type="float">
+    <qti-default-value>
+      <qti-value>1.0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-item-body>
+    <div class="stem">
+      <p>Put these historical events in the correct chronological order.</p>
+    </div>
+    <qti-order-interaction response-identifier="RESPONSE" shuffle="true">
+      <qti-simple-choice identifier="magna_carta">
+        <p>Magna Carta signed (1215)</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="printing">
+        <p>Gutenberg's printing press (1440)</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="columbus">
+        <p>Columbus reaches the Americas (1492)</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="declaration">
+        <p>US Declaration of Independence (1776)</p>
+      </qti-simple-choice>
+    </qti-order-interaction>
+  </qti-item-body>
+  <qti-response-processing>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-match>
+          <qti-variable identifier="RESPONSE"/>
+          <qti-correct identifier="RESPONSE"/>
+        </qti-match>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+  </qti-response-processing>
+</qti-assessment-item>

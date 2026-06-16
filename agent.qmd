@@ -1,0 +1,54 @@
+---
+title: "TimeBack Alpha Read Packager — agent reference"
+format: gfm
+---
+
+# Agent reference — Alpha Read Packager (`arpack`)
+
+Drive `arpack.py` to assemble a **contract-valid Alpha Read course** (OneRoster v1p2 + QTI 3.0)
+from QTI items + a skeleton — or `course_orchestrator.py` to build a whole course in one command. The
+contract is reverse-engineered from a live production course export (1077 items) **and** cross-checked against
+Ilma's `incept-timeback-plugin` skill (where we differed, she won — corrections applied below).
+
+## The model (verified, do not deviate)
+`Course (alpha_read markers + publish flags) → flat units → resource per lesson (lessonType:"alpha-read-article") → QTI assessment-test → items + stimulus`.
+- Per lesson: **3–6 guiding** items (1 passage + 1 MCQ each, carries a stimulus-ref) **+ exactly 4 quiz** items (no stimulus).
+- Items: **MCQ (single) + MSQ (multi-correct)** verified; other r2 formats accepted (`fill-in/hot-text/drag-to-order/match/ebsr`). Answer key from `qti-correct-response`.
+- Every item carries its **question stem** in `interaction.questionStructure.prompt` (Ilma's JSON template shape, create-mcq.md); options nest in `questionStructure.choices`. A stemless item renders as naked options — the validator fail-closes on it.
+- **App ownership (Ramish breaking change, ≥2026-06-30):** root `course.primaryApp` is the ONLY ownership setter and must be exactly `"alpha_read"`; `metadata.primaryApp` is now **inert** (mirrored for pre-cutover servers, forward-safe to drop).
+- Passage HTML ⊆ `div/p/h1/h2/strong/em/br/blockquote` + MathML; **images must be S3 URLs** (no other media). Standards do **not** serialise (live course tags none).
+
+## Run it
+1. **Ingest Mayank's output (no reshaping):** `output_dir_ingester.from_timeback_build_output(dir)` reads his `manifest.json` + `items/*.xml` + `stimuli/*.xml`. Or one item: `arpack.from_qti_xml(xml)` → `{identifier,title,role,stimulus_ref,prompt,choices,correct_id(s)}` (role auto-inferred; `adapt_qti_item` **raises** if the key isn't among choices).
+2. **Ingest Anirudh's skeleton:** `skeleton_adapter.from_skeleton_table("expeditions.csv")` → units (band→Lexile, genre, coverage).
+3. **Assemble → validate → emit:** `python3 src/arpack.py build skeleton.json out/` (fail-closed validator runs first). Or **one command**: `python3 src/course_orchestrator.py skeleton.json out/`.
+
+## Validator rejects (fail-closed)
+non-S3 media · MCQ <2 choices · key not among choices · **missing question stem** (`interaction.questionStructure.prompt`) ·
+missing markers/publish flags · **root `primaryApp` not exactly `"alpha_read"`** (null/empty/non-string/alias→422) ·
+authored `metadata.metrics` · id-coupling breaks · wrong section structure · content/prompt not well-formed XHTML after sanitize.
+
+## Render (live behavior — what AlphaRead shows)
+Vertical article→question→unlock. Per lesson: passage + MCQs. The QTI API accepts the tech-enhanced formats,
+but **whether AlphaRead renders them is unverified** — the open
+**renderer probe** (needs a test-student account, not real children). Keep MCQ/MSQ as the safe default.
+
+## Cross-check vs Ilma's skill — corrections APPLIED
+- **D3** component-resource links carry `status:"active"` + `metadata.lessonType` (else 422).
+- **G2** every test + item carries `qti-outcome-declaration[SCORE]` (else score always 0).
+- **G1** all stimulus/choice/**prompt** content runs through Ilma's `sanitize_html.full_sanitize` (XHTML); `validate()` gates on well-formedness. *Highest-value — the #1 render bug.*
+- **G3** the question **stem** is emitted into `interaction.questionStructure.prompt` (+ options under `questionStructure.choices`) — Ilma's JSON template (create-mcq.md / create-frq.md). Previously the parsed prompt was dropped on emit → items rendered as naked choices. Now fail-closed.
+- **A2** root `primaryApp` is the validator's **hard gate** (exact `"alpha_read"`; null/empty/non-string/alias → 422); `metadata.primaryApp` relaxed to **inert/optional** (package valid if dropped; flagged only if present-and-wrong).
+- **D4** item-ref `href` = bare `{id}.xml`; **D5** MCQ choice floor relaxed to ≥2; resource `url` → https.
+- **LATENT (D1/D2 — tracked, fires before any non-choice item ships):** Ilma RULE 1 fixes the JSON-safe set at exactly **`choice` / `extended-text` / `order` / `text-entry`**. arpack *also* emits `hottext / match / associate / inline-choice / gap-match / ebsr` as JSON dicts — those MUST POST raw **XML** (the JSON→XML converter silently corrupts their scoring). Our shipping content today is MCQ/MSQ (`choice`) + `text-entry` = all JSON-safe, so this does not bite yet. Two residual EBSR specifics to fix on the XML path: (1) `responseProcessing.templateType:"map_response"` is **not** a real Ilma template (she uses `match_correct`); (2) EBSR is a composite, XML-only. Until then the validator accepts these types (so the emitter is forward-ready), but the **push** must branch to XML for anything outside the 4 JSON-safe types.
+
+## Push — via Ilma's `/timeback` skill, NOT hand-rolled
+`arpack` is a clean offline emitter. The upload is Ilma's surface (45+ nightly tests vs the live API): she
+owns auth (Cognito body creds + token cache + 401 refresh), the push order (S3→course→units→lessons→items→
+tests→stimuli→resources(trailing `/`)→links, 409=success, checkpoint each), JSON-vs-XML branching, and
+GET-modify-PUT. Pre-flight: write-scoped Cognito client + `POST /validate`. Push only to a
+`STAN-PROBE-DELETEME…` draft; post-push, open ≥1 lesson in the student UI (200 ≠ rendered).
+
+## Verified vs open
+- **Verified (offline):** ingests the real `incept-qti-sdk` output unedited (the 4-item + 13-item all-7 fixtures); parses all 1077 items of the live course export cleanly (no wrong keys/blanks); emits shapes that match that export field-for-field; one-command orchestrator → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
+- **Open:** a real multi-lesson course end-to-end on the live skeleton + full generator output; live rendering of the tech-enhanced formats is unverified; **never POSTed to a server** (shape-match, not server-accept) — closed by `POST /validate` + the Ilma-pipeline push.

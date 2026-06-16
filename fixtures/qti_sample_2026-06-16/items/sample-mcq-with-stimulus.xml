@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="sample-mcq-with-stimulus" title="ChoiceInteraction" adaptive="false" time-dependent="false" tool-name="incept-qti-sdk" tool-version="0.5.7">
+  <qti-response-declaration identifier="RESPONSE" cardinality="single" base-type="identifier">
+    <qti-correct-response>
+      <qti-value>B</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="MAXSCORE" cardinality="single" base-type="float">
+    <qti-default-value>
+      <qti-value>1.0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-assessment-stimulus-ref identifier="stim_20c1a57c2496" href="stimuli/stim_20c1a57c2496.xml"/>
+  <qti-item-body>
+    <div class="stem">
+      <p>Using the passage above, what is the primary cause of ocean acidification?</p>
+    </div>
+    <qti-choice-interaction response-identifier="RESPONSE" max-choices="1">
+      <qti-simple-choice identifier="A">
+        <p>Increased fishing activity</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="B">
+        <p>Absorption of excess <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>C</mi><msub><mi>O</mi><mn>2</mn></msub></mrow></math> from the atmosphere</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="C">
+        <p>Rising ocean temperatures</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="D">
+        <p>Plastic pollution</p>
+      </qti-simple-choice>
+    </qti-choice-interaction>
+  </qti-item-body>
+  <qti-response-processing>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-match>
+          <qti-variable identifier="RESPONSE"/>
+          <qti-base-value base-type="identifier">B</qti-base-value>
+        </qti-match>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+  </qti-response-processing>
+</qti-assessment-item>

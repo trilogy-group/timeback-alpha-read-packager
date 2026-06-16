@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-stimulus xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="stim_308fa4b211dd" title="Stimulus stim_308fa4b211dd">
+  <qti-stimulus-body>
+    <div class="tb-stimulus-container">
+      <div class="tb-text-stimulus-container"><h2>The Ancient Maya</h2>
+<p>The Maya civilization flourished in Mesoamerica from roughly 2000 BCE to 1500 CE. Working independently in the Americas, Maya scholars created a calendar more accurate than the one used in Europe at the time. They also developed one of the few fully written languages in the pre-Columbian Americas, recorded history and mythology in folded bark books called codices. Maya mathematicians invented the concept of zero centuries before it appeared in Europe, and their astronomers tracked planetary cycles with remarkable precision. The Maya built towering stone pyramids used for religious ceremonies. Maya cities were home to tens of thousands of people at their peak. The Maya grew crops such as maize, beans, and squash to feed their population.</p></div>
+    </div>
+  </qti-stimulus-body>
+</qti-assessment-stimulus>

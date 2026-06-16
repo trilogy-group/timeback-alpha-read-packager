@@ -1,0 +1,51 @@
+{
+  "course": {
+    "title": "Grade-3 Reading Probe",
+    "courseCode": "ALPHAREAD-PROBE",
+    "grades": ["3"],
+    "subjects": ["Reading"],
+    "org_sourcedId": "powerpath-ui-org",
+    "contentGrade": "3"
+  },
+  "units": [
+    {
+      "title": "Animals & Classification",
+      "sortOrder": 1,
+      "band": "A",
+      "genre": "informational",
+      "lexile_band": [400, 460],
+      "coverage": {"standards": ["RI.3.1", "RI.3.2"], "new_at_band": ["main idea", "key details"]},
+      "lessons": [
+        {"vendorId": 3100001, "title": "What Makes a Mammal?", "band": "A",
+         "grade": "3", "measuredReadingGrade": "3", "lexileLevel": "430",
+         "genre": "informational", "guiding_count": 5}
+      ]
+    },
+    {
+      "title": "The Human Body",
+      "sortOrder": 2,
+      "band": "B",
+      "genre": "informational",
+      "lexile_band": [480, 540],
+      "coverage": {"standards": ["RI.3.4", "RI.3.5"], "new_at_band": ["text structure"]},
+      "lessons": [
+        {"vendorId": 3200001, "title": "How the Heart Works", "band": "B",
+         "grade": "3", "measuredReadingGrade": "3", "lexileLevel": "510",
+         "genre": "informational", "guiding_count": 5}
+      ]
+    },
+    {
+      "title": "Age of Exploration",
+      "sortOrder": 3,
+      "band": "C",
+      "genre": "informational",
+      "lexile_band": [560, 600],
+      "coverage": {"standards": ["RI.3.6", "RI.3.9"], "new_at_band": ["compare accounts"]},
+      "lessons": [
+        {"vendorId": 3300001, "title": "Sailing into the Unknown", "band": "C",
+         "grade": "3", "measuredReadingGrade": "3", "lexileLevel": "590",
+         "genre": "informational", "guiding_count": 5}
+      ]
+    }
+  ]
+}

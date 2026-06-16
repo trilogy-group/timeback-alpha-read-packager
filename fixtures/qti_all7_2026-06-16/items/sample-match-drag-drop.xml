@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="sample-match-drag-drop" title="MatchInteraction" adaptive="false" time-dependent="false" tool-name="incept-qti-sdk" tool-version="0.5.7">
+  <qti-response-declaration identifier="RESPONSE" cardinality="multiple" base-type="directedPair">
+    <qti-correct-response>
+      <qti-value>france paris</qti-value>
+      <qti-value>japan tokyo</qti-value>
+      <qti-value>brazil brasilia</qti-value>
+      <qti-value>egypt cairo</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="MAXSCORE" cardinality="single" base-type="float">
+    <qti-default-value>
+      <qti-value>1.0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-item-body>
+    <div class="stem">
+      <p>Match each country to its capital city.</p>
+    </div>
+    <qti-match-interaction response-identifier="RESPONSE" max-associations="4" shuffle="true" class="qti-choices-top">
+      <qti-simple-match-set>
+        <qti-simple-associable-choice identifier="france" match-max="1">
+          <p>France</p>
+        </qti-simple-associable-choice>
+        <qti-simple-associable-choice identifier="japan" match-max="1">
+          <p>Japan</p>
+        </qti-simple-associable-choice>
+        <qti-simple-associable-choice identifier="brazil" match-max="1">
+          <p>Brazil</p>
+        </qti-simple-associable-choice>
+        <qti-simple-associable-choice identifier="egypt" match-max="1">
+          <p>Egypt</p>
+        </qti-simple-associable-choice>
+      </qti-simple-match-set>
+      <qti-simple-match-set>
+        <qti-simple-associable-choice identifier="paris" match-max="1">
+          <p>Paris</p>
+        </qti-simple-associable-choice>
+        <qti-simple-associable-choice identifier="tokyo" match-max="1">
+          <p>Tokyo</p>
+        </qti-simple-associable-choice>
+        <qti-simple-associable-choice identifier="brasilia" match-max="1">
+          <p>Brasília</p>
+        </qti-simple-associable-choice>
+        <qti-simple-associable-choice identifier="cairo" match-max="1">
+          <p>Cairo</p>
+        </qti-simple-associable-choice>
+      </qti-simple-match-set>
+    </qti-match-interaction>
+  </qti-item-body>
+  <qti-response-processing>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-match>
+          <qti-variable identifier="RESPONSE"/>
+          <qti-correct identifier="RESPONSE"/>
+        </qti-match>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+  </qti-response-processing>
+</qti-assessment-item>

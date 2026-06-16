@@ -1,0 +1,125 @@
+{
+  "course": {
+    "title": "STAN-PROBE-DELETEME Reading G3",
+    "courseCode": "ALPHAREAD-PROBE",
+    "grades": [
+      "3"
+    ],
+    "subjects": [
+      "Reading"
+    ],
+    "org_sourcedId": "powerpath-ui-org"
+  },
+  "units": [
+    {
+      "title": "Animals & Classification",
+      "sortOrder": 1,
+      "lessons": [
+        {
+          "vendorId": 9000001,
+          "title": "What Makes a Mammal?",
+          "xp": 12,
+          "guiding": [
+            {
+              "stimulus": {
+                "title": "Section 1",
+                "html": "<div><h1>Mammals</h1><p>Mammals have <strong>fur</strong> and feed milk.</p></div>"
+              },
+              "item": {
+                "title": "Q1",
+                "prompt": "What do mammals feed their young?",
+                "choices": [
+                  "Milk",
+                  "Seeds",
+                  "Rocks",
+                  "Water"
+                ],
+                "correct_index": 0
+              }
+            },
+            {
+              "stimulus": {
+                "title": "Section 2",
+                "html": "<div><p>A whale is a mammal that lives in the sea.</p></div>"
+              },
+              "item": {
+                "title": "Q2",
+                "prompt": "Where does a whale live?",
+                "choices": [
+                  "The sea",
+                  "A tree",
+                  "A cave",
+                  "The sky"
+                ],
+                "correct_index": 0
+              }
+            },
+            {
+              "stimulus": {
+                "title": "Section 3",
+                "html": "<div><p>Bats are mammals that can fly.</p></div>"
+              },
+              "item": {
+                "title": "Q3",
+                "prompt": "What can bats do?",
+                "choices": [
+                  "Fly",
+                  "Swim fast",
+                  "Breathe water",
+                  "Glow"
+                ],
+                "correct_index": 0
+              }
+            }
+          ],
+          "quiz": [
+            {
+              "title": "QZ1",
+              "prompt": "Mammals have...",
+              "choices": [
+                "Fur",
+                "Scales",
+                "Feathers",
+                "Shells"
+              ],
+              "correct_index": 0
+            },
+            {
+              "title": "QZ2",
+              "prompt": "A whale is a...",
+              "choices": [
+                "Mammal",
+                "Fish",
+                "Bird",
+                "Bug"
+              ],
+              "correct_index": 0
+            },
+            {
+              "title": "QZ3",
+              "prompt": "Bats can...",
+              "choices": [
+                "Fly",
+                "Dig",
+                "Swim",
+                "Sing"
+              ],
+              "correct_index": 0
+            },
+            {
+              "title": "QZ4",
+              "prompt": "Mammals feed young with...",
+              "choices": [
+                "Milk",
+                "Sand",
+                "Air",
+                "Leaves"
+              ],
+              "correct_index": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

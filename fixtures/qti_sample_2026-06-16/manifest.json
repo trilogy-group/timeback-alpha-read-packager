@@ -1,0 +1,45 @@
+﻿{
+  "output_dir": "examples\\new_timeback_build_output",
+  "items": [
+    {
+      "item_id": "sample-mcq-no-stimulus",
+      "item_xml": "items/sample-mcq-no-stimulus.xml",
+      "stimulus_xml": null,
+      "stimulus_id": null,
+      "metadata": {
+        "interaction_type": "choiceInteraction",
+        "feedback_type": "nonadaptive"
+      }
+    },
+    {
+      "item_id": "sample-mcq-with-stimulus",
+      "item_xml": "items/sample-mcq-with-stimulus.xml",
+      "stimulus_xml": "stimuli/stim_20c1a57c2496.xml",
+      "stimulus_id": "stim_20c1a57c2496",
+      "metadata": {
+        "interaction_type": "choiceInteraction",
+        "feedback_type": "nonadaptive"
+      }
+    },
+    {
+      "item_id": "sample-msq-no-stimulus",
+      "item_xml": "items/sample-msq-no-stimulus.xml",
+      "stimulus_xml": null,
+      "stimulus_id": null,
+      "metadata": {
+        "interaction_type": "choiceInteraction",
+        "feedback_type": "nonadaptive"
+      }
+    },
+    {
+      "item_id": "sample-msq-with-stimulus",
+      "item_xml": "items/sample-msq-with-stimulus.xml",
+      "stimulus_xml": "stimuli/stim_183862046711.xml",
+      "stimulus_id": "stim_183862046711",
+      "metadata": {
+        "interaction_type": "choiceInteraction",
+        "feedback_type": "nonadaptive"
+      }
+    }
+  ]
+}

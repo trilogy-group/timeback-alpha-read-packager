@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="sample-fill-in-single" title="TextEntryInteraction" adaptive="false" time-dependent="false" tool-name="incept-qti-sdk" tool-version="0.5.7">
+  <qti-response-declaration identifier="RESPONSE" cardinality="single" base-type="string">
+    <qti-correct-response>
+      <qti-value>mitochondria</qti-value>
+      <qti-value>mitochondrion</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="MAXSCORE" cardinality="single" base-type="float">
+    <qti-default-value>
+      <qti-value>1.0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-item-body>
+    <div class="stem">
+      <p>Complete the sentence: The powerhouse of the cell is the <qti-text-entry-interaction response-identifier="RESPONSE" expected-length="14" class="inline-text-entry"/>.</p>
+    </div>
+  </qti-item-body>
+  <qti-response-processing>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-or>
+          <qti-string-match case-sensitive="false">
+            <qti-variable identifier="RESPONSE"/>
+            <qti-base-value base-type="string">mitochondria</qti-base-value>
+          </qti-string-match>
+          <qti-string-match case-sensitive="false">
+            <qti-variable identifier="RESPONSE"/>
+            <qti-base-value base-type="string">mitochondrion</qti-base-value>
+          </qti-string-match>
+        </qti-or>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+  </qti-response-processing>
+</qti-assessment-item>

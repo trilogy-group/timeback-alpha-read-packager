@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="sample-ebsr" title="CompositeInteraction" adaptive="false" time-dependent="false" tool-name="incept-qti-sdk" tool-version="0.5.7">
+  <qti-response-declaration identifier="RESPONSE_1" cardinality="single" base-type="identifier">
+    <qti-correct-response>
+      <qti-value>B</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-response-declaration identifier="RESPONSE_2" cardinality="single" base-type="identifier">
+    <qti-correct-response>
+      <qti-value>B</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" normal-maximum="2.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="MAXSCORE" cardinality="single" base-type="float">
+    <qti-default-value>
+      <qti-value>2.0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="SCORE_1" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="SCORE_2" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-assessment-stimulus-ref identifier="stim_308fa4b211dd" href="stimuli/stim_308fa4b211dd.xml"/>
+  <qti-item-body>
+    <div class="stem">
+      <p>Read the passage and answer both parts.</p>
+    </div>
+    <qti-choice-interaction response-identifier="RESPONSE_1" max-choices="1">
+      <qti-prompt>
+        <p><strong class="part-label">Part A.</strong> What is the main reason the Maya civilization is considered remarkable?</p>
+      </qti-prompt>
+      <qti-simple-choice identifier="A">
+        <p>They built large armies that conquered all of the Americas.</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="B">
+        <p>They developed a sophisticated writing system, astronomy, and mathematics without contact with other advanced civilizations.</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="C">
+        <p>They were the first civilization to invent the wheel.</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="D">
+        <p>They established trade routes as far as Europe and Asia.</p>
+      </qti-simple-choice>
+    </qti-choice-interaction>
+    <div class="part-spacing">
+      <br/>
+    </div>
+    <qti-choice-interaction response-identifier="RESPONSE_2" max-choices="1">
+      <qti-prompt>
+        <p><strong class="part-label">Part B.</strong> Which detail from the passage <strong>best</strong> supports your answer in Part A?</p>
+      </qti-prompt>
+      <qti-simple-choice identifier="A">
+        <p>"The Maya built towering stone pyramids used for religious ceremonies."</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="B">
+        <p>"Working independently in the Americas, Maya scholars created a calendar more accurate than the one used in Europe at the time."</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="C">
+        <p>"Maya cities were home to tens of thousands of people at their peak."</p>
+      </qti-simple-choice>
+      <qti-simple-choice identifier="D">
+        <p>"The Maya grew crops such as maize, beans, and squash to feed their population."</p>
+      </qti-simple-choice>
+    </qti-choice-interaction>
+  </qti-item-body>
+  <qti-response-processing>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-match>
+          <qti-variable identifier="RESPONSE_1"/>
+          <qti-base-value base-type="identifier">B</qti-base-value>
+        </qti-match>
+        <qti-set-outcome-value identifier="SCORE_1">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE_1">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-match>
+          <qti-variable identifier="RESPONSE_2"/>
+          <qti-base-value base-type="identifier">B</qti-base-value>
+        </qti-match>
+        <qti-set-outcome-value identifier="SCORE_2">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE_2">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+    <qti-set-outcome-value identifier="SCORE">
+      <qti-sum>
+        <qti-variable identifier="SCORE_1"/>
+        <qti-variable identifier="SCORE_2"/>
+      </qti-sum>
+    </qti-set-outcome-value>
+  </qti-response-processing>
+</qti-assessment-item>

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-stimulus xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="stim_183862046711" title="Stimulus stim_183862046711">
+  <qti-stimulus-body>
+    <div class="tb-stimulus-container">
+      <div class="tb-text-stimulus-container"><h2>Photosynthesis</h2>
+<p>Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water. Chlorophyll in plant cells captures light energy. During photosynthesis, glucose is produced and oxygen is released as a byproduct.</p></div>
+    </div>
+  </qti-stimulus-body>
+</qti-assessment-stimulus>

@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" identifier="sample-fill-in-multi" title="TextEntryInteraction" adaptive="false" time-dependent="false" tool-name="incept-qti-sdk" tool-version="0.5.7">
+  <qti-response-declaration identifier="RESPONSE_BLANK_1" cardinality="single" base-type="string">
+    <qti-correct-response>
+      <qti-value>5</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-response-declaration identifier="RESPONSE_BLANK_2" cardinality="single" base-type="string">
+    <qti-correct-response>
+      <qti-value>5</qti-value>
+    </qti-correct-response>
+  </qti-response-declaration>
+  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" normal-maximum="1.0">
+    <qti-default-value>
+      <qti-value>0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="MAXSCORE" cardinality="single" base-type="float">
+    <qti-default-value>
+      <qti-value>1.0</qti-value>
+    </qti-default-value>
+  </qti-outcome-declaration>
+  <qti-outcome-declaration identifier="FEEDBACK" cardinality="single" base-type="identifier"/>
+  <qti-outcome-declaration identifier="MODAL_FEEDBACK" cardinality="single" base-type="identifier"/>
+  <qti-item-body>
+    <div class="stem">
+      <p>Complete the equation: <qti-text-entry-interaction response-identifier="RESPONSE_BLANK_1" expected-length="2" class="inline-text-entry"/> + <qti-text-entry-interaction response-identifier="RESPONSE_BLANK_2" expected-length="2" class="inline-text-entry"/> = 10, where both values are equal.</p>
+    </div>
+    <qti-feedback-block identifier="correct" outcome-identifier="FEEDBACK" show-hide="show">
+      <qti-content-body>
+        <div class="qti-feedback-correct">
+          <p><strong>Correct!</strong> 5 + 5 = 10.</p>
+        </div>
+      </qti-content-body>
+    </qti-feedback-block>
+    <qti-feedback-block identifier="incorrect" outcome-identifier="FEEDBACK" show-hide="show">
+      <qti-content-body>
+        <div class="qti-feedback-incorrect">
+          <p>Both blanks must be equal and sum to 10. Try 5 and 5.</p>
+        </div>
+      </qti-content-body>
+    </qti-feedback-block>
+  </qti-item-body>
+  <qti-response-processing>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-and>
+          <qti-string-match case-sensitive="false">
+            <qti-variable identifier="RESPONSE_BLANK_1"/>
+            <qti-base-value base-type="string">5</qti-base-value>
+          </qti-string-match>
+          <qti-string-match case-sensitive="false">
+            <qti-variable identifier="RESPONSE_BLANK_2"/>
+            <qti-base-value base-type="string">5</qti-base-value>
+          </qti-string-match>
+        </qti-and>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">1</qti-base-value>
+        </qti-set-outcome-value>
+        <qti-set-outcome-value identifier="FEEDBACK">
+          <qti-base-value base-type="identifier">correct</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="SCORE">
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-set-outcome-value>
+        <qti-set-outcome-value identifier="FEEDBACK">
+          <qti-base-value base-type="identifier">incorrect</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+    <qti-response-condition>
+      <qti-response-if>
+        <qti-gte>
+          <qti-variable identifier="SCORE"/>
+          <qti-variable identifier="MAXSCORE"/>
+        </qti-gte>
+        <qti-set-outcome-value identifier="MODAL_FEEDBACK">
+          <qti-base-value base-type="identifier">modal_feedback_correct</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-if>
+      <qti-response-else-if>
+        <qti-gt>
+          <qti-variable identifier="SCORE"/>
+          <qti-base-value base-type="float">0</qti-base-value>
+        </qti-gt>
+        <qti-set-outcome-value identifier="MODAL_FEEDBACK">
+          <qti-base-value base-type="identifier">modal_feedback_partial</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else-if>
+      <qti-response-else>
+        <qti-set-outcome-value identifier="MODAL_FEEDBACK">
+          <qti-base-value base-type="identifier">modal_feedback_incorrect</qti-base-value>
+        </qti-set-outcome-value>
+      </qti-response-else>
+    </qti-response-condition>
+  </qti-response-processing>
+  <qti-modal-feedback outcome-identifier="MODAL_FEEDBACK" identifier="modal_feedback_correct" show-hide="show">
+    <qti-content-body>
+      <div>
+        <p><strong>Correct!</strong> 5 + 5 = 10.</p>
+      </div>
+    </qti-content-body>
+  </qti-modal-feedback>
+  <qti-modal-feedback outcome-identifier="MODAL_FEEDBACK" identifier="modal_feedback_incorrect" show-hide="show">
+    <qti-content-body>
+      <div>
+        <p>Both blanks must be equal and sum to 10. Try 5 and 5.</p>
+      </div>
+    </qti-content-body>
+  </qti-modal-feedback>
+</qti-assessment-item>
