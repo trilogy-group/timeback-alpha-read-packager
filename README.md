@@ -67,10 +67,15 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   `published`, student-view with answer keys hidden. Confirmed for **both** the bridge-generated QTI
   (`examples/g3v2_demo_bridge.py`) **and the production `incept-qti-sdk` package** (6 items, real ELA sample),
   which our packager also parses clean. Real TimeBack QC, sandbox tenant — **not** the live Alpha Read renderer.
-- **Open / unverified:** the **live Alpha Read production** push (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`)
-  is still pending — it's cred-gated. Whether the Alpha Read app **renders** the tech-enhanced formats is the
-  open renderer probe (needs a test-student account); a full multi-lesson course end-to-end awaits the live
-  skeleton + full generator.
+- **Live push + render (verified 2026-06-17):** the production `incept-qti-sdk` package (6 items + 6 stimuli)
+  was pushed to **live Alpha Read** (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`) as a `STAN-PROBE-DELETEME`
+  draft — 6 items (verbatim XML POST) + test + a full OneRoster course/unit/lesson/resource/link, all 201. It
+  **renders in AlphaBuild**: all 6 formats appear (Choice/Match/Order/Composite-EBSR/HotText), the QTI panel
+  shows **✅ Valid**, and the live preview renders the passage + question. (This is the authoring + preview
+  render; the student-facing Alpha Read app render still needs an enrolled test-student.)
+- **Open:** student-app render with an enrolled test-student; a full multi-lesson course end-to-end awaits the
+  live skeleton + full generator; org matters — a draft must land in an org the viewer belongs to (the example
+  org `346488d3…` returned "Access denied"; the viewer's own org renders fine).
 
 ## Upload — two real targets
 - **Demo (proven):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's

@@ -75,8 +75,14 @@ but a sandbox tenant — NOT the live Alpha Read app, so it does not answer the 
 resources(trailing `/`)→links, 409=success, checkpoint each), JSON-vs-XML branching, and GET-modify-PUT.
 Pre-flight: write-scoped Cognito client (via gitignored `.env`) + `POST /validate`. Push only to a
 `STAN-PROBE-DELETEME…` draft; post-push, open ≥1 lesson in the student UI (200 ≠ rendered).
+**Done once (2026-06-17):** items POST verbatim as `{"format":"xml","xml":<raw>}` to `…/api/assessment-items`;
+test → `…/api/assessment-tests`; stimuli → `…/api/stimuli` (`{identifier,title,content}`); OneRoster course/
+components/resources(`/resources/v1p2/resources/`)/links under `…/rostering/v1p2/...`. **Org gotcha:** a draft
+must be created in an org the viewer belongs to — the documented example org returned "Access denied" in
+AlphaBuild; using the viewer's own org rendered fine.
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
 - **Server-validated (demo tenant):** the QTI for all 6 sample formats (incl. raw-XML hot-text/match/ebsr) imports QC-trusted to the platform3 content-alpha `demo` tenant via `qti-package` — `trust_status:"trusted"`, `published`, student-view with answer keys hidden. Confirmed for both the bridge-generated QTI AND the production `incept-qti-sdk` package (6 items, real ELA sample), which our packager also parses clean. Real TimeBack QC, sandbox tenant — not the live Alpha Read renderer (that's the cred-gated live push).
-- **Open:** the **live Alpha Read production** push is still pending (cred-gated); whether the Alpha Read app renders the tech-enhanced formats is the open renderer probe (test-student account); a full multi-lesson course end-to-end awaits the live skeleton + full generator.
+- **Live push + render (verified 2026-06-17):** the production package (6 items + 6 stimuli) pushed to live Alpha Read as a `STAN-PROBE-DELETEME` draft (all 201) and **renders in AlphaBuild** — all 6 formats present, QTI panel **Valid**, live preview shows the passage + question.
+- **Open:** student-app render with an enrolled test-student (the above is the authoring/preview render); a full multi-lesson course end-to-end awaits the live skeleton + full generator.
