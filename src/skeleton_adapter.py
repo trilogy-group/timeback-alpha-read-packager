@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-skeleton_adapter — Anirudh SKELETON adapter for arpack (Stream S3, zero reshaping by Anirudh)
+skeleton_adapter — SKELETON adapter for arpack (Stream S3 — parses the native expedition table into units)
 
 Anirudh owns an expedition -> standards mapping: ~10 expeditions, each with a band (A/B/C),
 genre, NWEA-MAP standards, and a 'new-at-band' note. He sends it as a CSV or JSON *table*.

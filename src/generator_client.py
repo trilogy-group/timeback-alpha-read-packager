@@ -348,8 +348,8 @@ def _real_request_body(request: Any) -> Dict[str, Any]:
 def _generate_real(request: Any) -> Dict[str, Any]:
     body = _real_request_body(request)
     raise NotImplementedError(
-        "generator_client REAL backend is not wired yet (proven-not-promised: the "
-        "STUB runs the whole pipeline on Mayank's real QTI today; this is the "
+        "generator_client REAL backend is not wired yet (the STUB runs the whole "
+        "pipeline on Mayank's real QTI today; this real backend is the not-yet-wired "
         "one-line swap when his generator is live).\n"
         "WHEN WIRED it will:\n"
         f"  POST {REAL_GENERATOR_ENDPOINT}\n"

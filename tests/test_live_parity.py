@@ -4,7 +4,7 @@ These run against the REAL Alpha Read - Grade 3 export (course 4c49bc61, 1077 it
 120 lessons) when it is present on disk, and SKIP cleanly when it isn't (so the suite
 stays self-contained). They are the ground truth behind every "confirmed from live"
 claim in the docs: the canonical primaryApp value, the resource shape, and that arpack
-parses 100% of the live items with zero blank prompts / zero unresolvable answer keys.
+parses every item in the live export we sampled with zero blank prompts / zero unresolvable answer keys.
 """
 import glob
 import json
@@ -69,7 +69,7 @@ def test_live_resource_shape(live_export):
     assert "url" in md, "url lives INSIDE metadata (top-level url is silently dropped)"
 
 
-# ════════════════════════════ 100% live-item parse (the headline claim) ════════════════════════════
+# ════════════════════════════ full live-export parse (the headline check) ════════════════════════════
 def test_parse_all_live_items_no_blanks_no_bad_keys(live_export):
     item_files = glob.glob(os.path.join(live_export, "items", "*.json"))
     if not item_files:

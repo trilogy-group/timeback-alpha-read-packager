@@ -1,7 +1,7 @@
 # TimeBack Alpha Read Packager
 
 Turn **QTI items** + a **course skeleton** into a complete, **contract-valid TimeBack Alpha Read course**
-(OneRoster v1p2 + QTI 3.0), ready to push. Offline, fail-closed — the contract is
+(OneRoster v1p2 + QTI 3.0). Offline, fail-closed (passes the offline validator; never yet POSTed) — the contract is
 reverse-engineered from a live production `Alpha Read – Grade 3` course export (1077 items) and cross-checked
 against Ilma's `incept-timeback-plugin` skill.
 
@@ -30,7 +30,7 @@ generator). Draft-safe (course title forced to `STAN-PROBE-DELETEME…`), idempo
 that won't validate is reported + excluded, never silently shipped). **Scope: it emits the package; the
 *push* to TimeBack is the separate back-half** (Ilma's `/timeback` pipeline + a `POST /validate` server-accept check).
 
-## Feed it your native output — no reshaping
+## Feed it your native output
 | Hand over | The packager… |
 |---|---|
 | raw QTI item XMLs (as the incept-qti-sdk emits), grouped per lesson, + passages | `from_qti_xml` parses them; guiding/quiz **auto-detected** from the stimulus-ref |
@@ -39,7 +39,7 @@ that won't validate is reported + excluded, never silently shipped). **Scope: it
 Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator**, and emits the package.
 
 ## The contract (the validator enforces all of it)
-- Per lesson: **3–6 guiding** (1 passage + 1 four-option MCQ) **+ exactly 4 quiz**.
+- Per lesson: **3–6 guiding** (1 passage + 1 question each) **+ exactly 4 quiz** — the counts are enforced; the items we've sampled are four-option MCQs, but the validator accepts any of the 7 formats and a ≥2-option floor, not MCQ-ness or a fixed count of 4.
 - **All 7 r2 item formats end-to-end**, split by Ilma's RULE 1 *per item*: JSON-safe
   (`choice`/`order`/`extended-text`/single-blank `text-entry`) emit JSON; the rest
   (`hot-text`/`match`/`ebsr`/… **and multi-blank fill-in**) carry the **raw item XML verbatim**
@@ -53,13 +53,14 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
 - **Standards don't serialise** (the live course stores none) — they drive generator targeting + coverage only.
 
 ## Verified vs open
-- **Verified (offline):** ingests the real `incept-qti-sdk` output unedited — both the 4-item sample and the
+- **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits — both the 4-item sample and the
   13-item all-7 set (mcq/msq, drag-to-order, single + multi-blank fill-in, hot-text, match, EBSR); routes
   every non-JSON-safe item to byte-verbatim raw XML so the API's lossy converter can't touch its scoring;
-  parses all 1077 items of the live course export cleanly (no wrong keys, no blanks); emits a graph whose
-  shapes match that export field-for-field; the one-command orchestrator builds a package that passes the
+  parses every item of a live course export we pulled (~1077) cleanly (no wrong keys, no blanks); emits a graph whose
+  contract-invariant fields match that export (checked by the parity tests on the course header + one
+  round-tripped lesson); the one-command orchestrator (stub generator) builds a package that passes the
   fail-closed validator; cross-checked against Ilma's skill (her corrections adopted where we differed);
-  **206 tests** + `run_all.sh`'s four layers pass.
+  the full test suite + `run_all.sh`'s four layers pass.
 - **Open / unverified:** whether Alpha Read **renders** the tech-enhanced formats — the renderer probe
   (needs a test-student account); a full multi-lesson course end-to-end (awaiting the live skeleton + full
   generator); the package has **never been POSTed to a server** (shape-match, not server-accept — closed by
@@ -75,7 +76,7 @@ package-import endpoint exists, so QTI leaves get POSTed regardless.)
 src/        all 8 Python modules — run with `python3 src/<name>.py`
 examples/   sample skeleton + materialized JSON + the expedition CSV
 fixtures/   real incept-qti-sdk build output (the stub's source of truth)
-tests/      206-test pytest suite + run_all.sh (all 4 verification layers)
+tests/      pytest suite + run_all.sh (all 4 verification layers)
 skill.md · agent.qmd · README.md   the three docs (most important first)
 ```
 CLI path args (e.g. `examples/sample_skeleton.json`) stay relative to the repo root.

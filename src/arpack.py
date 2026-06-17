@@ -6,8 +6,9 @@ Turn a course skeleton + question items into a COMPLETE, contract-valid Alpha Re
 course package (OneRoster v1p2 + QTI 3.0), ready to push to TimeBack.
 
 Pipeline:  ingest -> assemble -> validate -> emit   (push is a separate, guarded step)
-The contract is the triple-verified live production export (Alpha Read - Grade 3,
-course 4c49bc61). Every invariant below was observed across 120 lessons / 1077 items.
+The contract is reverse-engineered from a live production export we pulled (Alpha Read - Grade 3,
+course 4c49bc61, ~1077 items / 120 lessons) — one sampled export, not the definitive basis for all
+courses. The invariants below are what we observed in the items we've parsed from that export.
 
 Usage:
   python3 arpack.py --selftest                  # build+validate a sample, no I/O to TimeBack
@@ -34,10 +35,12 @@ Drop forever (no home in production): skillCode, lessonCode, any video/media.
 import json, os, re, sys
 from xml.etree import ElementTree as ET
 
-# ---- input adapter: ingest Mayank's NATIVE raw QTI 3.0 item XML (zero reshaping) ----
+# ---- input adapter: parse + normalize Mayank's raw QTI 3.0 item XML. Only single-select 'choice'
+# appears in the export we sampled; the other families are exercised against synthetic fixtures only
+# (rendering unverified end-to-end). ----
 QTI_NS = "{http://www.imsglobal.org/xsd/imsqtiasi_v3p0}"
 QTI_ITEM_BASE = "https://qti.alpha-1edtech.ai/api/assessment-items/"   # live item-ref host
-# Vendored from Ilma's incept-timeback-plugin (authoritative, nightly-tested). HTML must be sanitized
+# The vendored timeback HTML sanitizer (per Ilma's plugin convention). HTML must be sanitized
 # to valid XHTML before it leaves arpack — partial reimplementations are a known render-bug source.
 try:
     from sanitize_html import full_sanitize as _full_sanitize
@@ -59,8 +62,10 @@ _FEEDBACK_LOCALNAMES = {"qti-feedback-inline", "qti-feedback-block", "qti-rubric
                         "qti-modal-feedback"}
 _BLOCK_LOCALNAMES = {"p", "div", "br", "h1", "h2", "h3", "h4", "li", "blockquote", "tr"}
 
-# r2 FORMAT -> QTI INTERACTION map (all 7 MAP-format families accepted; 'choice' stays the default
-# so the live export's single-select items keep working unchanged).
+# r2 FORMAT -> QTI INTERACTION map. The 7 r2/MAP families we ship are mcq/msq/fill-in/order/hot-text/
+# match/ebsr; ACCEPTED_ITEM_TYPES is a wider forward-compat superset, and QTI_INTERACTION_BY_TAG maps
+# the detectable interaction tags. 'choice' stays the default so the live export's single-select items
+# keep working unchanged.
 #   mcq          -> qti-choice-interaction (single-select)
 #   msq          -> qti-choice-interaction (multi-select)
 #   fill-in      -> qti-text-entry-interaction
@@ -91,11 +96,13 @@ R2_FORMAT_TO_TYPE = {
 # every type we accept as a fully-formed item (the validator must not hard-reject these)
 ACCEPTED_ITEM_TYPES = {"choice", "text-entry", "extended-text", "hottext", "order",
                        "associate", "match", "inline-choice", "gap-match", "ebsr",
-                       "select-point"}
+                       "select-point"}   # select-point is reserved/forward-compat: there is no
+# qti-select-point-interaction tag in QTI_INTERACTION_BY_TAG, so it cannot be auto-detected from input
+# yet (a select-point item would default-detect as 'choice').
 
 # ── Ilma CRITICAL RULE 1: the API's JSON->XML converter is LOSSY ──────────────────
 # JSON POST is SAFE for EXACTLY these 4 interaction families — the API faithfully
-# round-trips their JSON dict (verified across 3 AP builds + interaction-types.md).
+# round-trips their JSON dict (per Ilma's interaction-types.md — documented, not re-verified here).
 JSON_SAFE_TYPES = {"choice", "extended-text", "order", "text-entry"}
 # EVERYTHING ELSE renders broken / scores wrong if JSON-modelled (the converter silently
 # drops directedPair / hottext / gap-text / inline-choice / composite children). These MUST
@@ -110,8 +117,10 @@ def _is_xml_only(spec):
     A type in XML_ONLY_TYPES is always XML-only. ADDITIONALLY a MULTI-blank text-entry is XML-only:
     text-entry is JSON-safe ONLY for a single blank (one RESPONSE -> one input box). A fill-in with
     >1 blank has >1 inline qti-text-entry-interaction + >1 response-declaration, which the documented
-    single-interaction JSON model cannot carry — the converter merges the blanks into one synonym pool
-    and drops the inline placeholders (verified: sample-fill-in-multi). Ship its verbatim XML instead.
+    single-interaction JSON model cannot carry. The >1-blank shape + the XML-route decision are what we
+    verified against sample-fill-in-multi; the converter merging blanks into one synonym pool and
+    dropping the inline placeholders is the DOCUMENTED reason we XML-route (never POSTed, so not observed
+    here). Ship its verbatim XML instead.
     `spec` is either a parsed-item struct or the adapted struct (both carry 'format'/'text_blanks')."""
     fmt = spec.get("format", "choice")
     if fmt in XML_ONLY_TYPES:
@@ -170,7 +179,7 @@ def _detect_format(root):
 def _read_metadata(root):
     """Pass-through whatever rich metadata the item carries (r2: kct, ccss, teks, case_guid,
     map_goal, dok, p_m_target, genre, construct, distractor_family, ...). Reads qti-metadata-entry
-    key/value pairs. PRESERVE everything, REQUIRE nothing — live export items have empty {}."""
+    key/value pairs. PRESERVE everything, REQUIRE nothing — the export items we sampled had empty {}."""
     md = {}
     for entry in root.iter("qti-metadata-entry"):
         k = entry.attrib.get("key")
@@ -186,7 +195,7 @@ def _read_choices(root):
 
 def _read_prompt(root):
     """The item STEM, tolerant of two real shapes seen in the wild:
-      * the live export (1077/1077): <qti-prompt> INSIDE the interaction.
+      * the live export (every item we've parsed so far): <qti-prompt> INSIDE the interaction.
       * Mayank's incept-qti-sdk 0.5.7: NO <qti-prompt>; stem in <qti-item-body>/<div class="stem">.
     Prefer an explicit <qti-prompt> (don't regress live items), else fall back to the stem div, else
     to the item-body's own direct text/markup that sits OUTSIDE any interaction (last-ditch). Returns
@@ -304,9 +313,11 @@ def from_qti_xml(xml):
         # number of distinct answer blanks (RESPONSE / RESPONSE_BLANK_N declarations). A single-blank
         # fill-in is JSON-safe (1 RESPONSE -> 1 input box); a MULTI-blank fill-in has >1 inline
         # interaction + >1 response-declaration which the documented single-interaction JSON model
-        # CANNOT represent — the converter merges the blanks into one synonym pool AND drops the inline
-        # interaction placeholders (verified on sample-fill-in-multi). Ilma RULE 1 spirit: when the JSON
-        # model is lossy, ship the verbatim XML. So mark multi-blank text-entry XML-only.
+        # CANNOT represent. The >1-blank shape + the XML-route decision are what we verified on
+        # sample-fill-in-multi; the converter merging blanks into one synonym pool AND dropping the inline
+        # interaction placeholders is the DOCUMENTED reason we XML-route (never POSTed, so not observed
+        # here). Ilma RULE 1 spirit: when the JSON model is lossy, ship the verbatim XML. So mark
+        # multi-blank text-entry XML-only.
         out["text_blanks"] = len(by_blank) if by_blank is not None else 1
         if by_blank is not None:
             out["answers_by_blank"] = by_blank              # [[b1 synonyms], [b2 synonyms], …]
@@ -442,7 +453,7 @@ def adapt_qti_item(parsed):
             out["correct_indices"] = [ids.index(c) for c in parsed["correct_ids"]]
     return out
 
-# ---- input adapter: ingest Anirudh's NATIVE expedition table (zero reshaping) ----
+# ---- input adapter: ingest the native expedition table (parse into units) ----
 # Re-exported here so feeders have ONE import surface. The adapter lives in its own module
 # (skeleton_adapter.py) so it can be tested in isolation; it is optional at runtime.
 try:
@@ -469,7 +480,7 @@ ALLOWED_HTML_TAGS |= MATHML_TAGS
 MEDIA_TAGS = {"audio", "video", "source", "iframe", "object", "embed"}
 GUIDING_MIN, GUIDING_MAX = 3, 6
 QUIZ_ITEMS = 4
-CHOICES_PER_ITEM = 4                                     # enforced ONLY for single-select 'choice' items
+CHOICES_PER_ITEM = 4                                     # live-export convention is 4 options; NOT enforced — the choice validator floor is >=2 (see _validate_item)
 COURSE_MARKERS = {"primaryApp": "alpha_read"}            # also mirrored in metadata
 THROWAWAY_PREFIX = "STAN-PROBE-DELETEME"
 
@@ -509,7 +520,7 @@ def assemble(skel):
         "org": {"sourcedId": c["org_sourcedId"]},
         # ROOT primaryApp is the AUTHORITATIVE app-ownership setter (Ramish breaking change,
         # >=2026-06-30: metadata.primaryApp no longer confers ownership). Must be the exact active
-        # applications.sourcedId — "alpha_read", confirmed from the live prod export. Never null
+        # applications.sourcedId — "alpha_read", seen in the live prod export we sampled. Never null
         # (null on a PUT CLEARS ownership), never an alias/case variant (-> 422 InvalidData).
         "primaryApp": "alpha_read",                       # ← the one real ownership switch
         "metadata": {
@@ -618,7 +629,7 @@ def _xml_envelope_item(iid, spec, stimulus_id):
 
 
 def _item(iid, spec, stimulus_id):
-    """Build one ingestible QTI assessment-item.
+    """Build one QTI assessment-item in the live-ingest shape.
 
     Handles all 7 r2 formats with the Ilma RULE 1 split (decided per ITEM by _is_xml_only):
       * JSON-SAFE (choice/order/extended-text/SINGLE-blank text-entry) -> JSON dict (the live
@@ -639,8 +650,9 @@ def _item(iid, spec, stimulus_id):
             "timeDependent": False, "adaptive": False}
     # Item-level SCORE outcome declaration — present in BOTH Ilma's JSON MCQ template
     # (create-mcq.md) AND Mayank's native incept-qti-sdk items (sample-*.xml carry a SCORE float
-    # outcome decl). Without it the platform scores 0 ("Score always 0 -> missing SCORE outcome
-    # declaration", create-test.md). JSON-safe and required for every interaction type we emit.
+    # outcome decl). Without it the platform scores 0 (per Ilma's create-test.md: "Score always 0 ->
+    # missing SCORE outcome declaration" — documented platform behavior, not observed here). JSON-safe
+    # and required for every interaction type we emit.
     item["outcomeDeclarations"] = [{"identifier": "SCORE", "cardinality": "single",
                                     "baseType": "float"}]
     md = spec.get("metadata")
@@ -843,7 +855,7 @@ def validate(pkg):
     # --- app ownership (Ramish breaking change, deploys >= 2026-06-30) ----------------
     # ROOT course.primaryApp is the ONE authoritative ownership setter. It must be a NON-EMPTY
     # STRING that EXACTLY matches an active applications.sourcedId — the canonical value for our
-    # course is "alpha_read" (confirmed from the live production export course_4c49bc61_raw.json,
+    # course is "alpha_read" (seen in the live production export we sampled, course_4c49bc61_raw.json,
     # root primaryApp="alpha_read"). Aliases / case / spacing variants -> 422 InvalidData on the
     # server, so we fail-closed on anything but the exact string here. We also explicitly reject
     # None ("primaryApp:null" CLEARS ownership on a PUT — we must never emit it) and the empty /
@@ -1040,7 +1052,8 @@ def main(argv):
 # ---- PUSH_NOTES (NOT implemented; deliberate) ----------------------------------
 # Push paths (admin access removes the Infisical dep for the OneRoster half):
 #   Path A: TimeBack admin "Manage Courses" import (if it ingests a package) — TBD.
-#   Path B: AlphaBuild authoring + "Sync All Lesson Plans" (proven the live course was built this way).
+#   Path B: AlphaBuild authoring + "Sync All Lesson Plans" (the live course is BELIEVED to have been
+#           authored this way — provenance not confirmed here).
 #   Path C: direct API — QTI leaves via POST /stimuli,/assessment-items,/assessment-tests (no import
 #           endpoint exists, so QTI is POSTed regardless), OneRoster via /ims/oneroster.
 # SAFETY RAIL for any future push(): assert pkg["course"]["title"].startswith("STAN-PROBE-DELETEME")

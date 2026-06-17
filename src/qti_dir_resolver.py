@@ -13,7 +13,7 @@ skeleton. This module groups his loose files into arpack lessons and hands back 
 WHAT THE LIVE EXPORT PROVED (1077 items / 120 lessons / 597 stimuli), drives the design:
 
   • A guiding item ALWAYS carries  <qti-assessment-stimulus-ref href="stimuli/<sid>">.
-    A quiz item NEVER carries one.  → role is self-describing (no tag needed). [1077/1077]
+    A quiz item NEVER carries one.  → role is self-describing (no tag needed). [held for every item in the export we sampled]
   • guiding item id == guiding_<A>_<B>;  its stimulus id == guiding_<A>  (the id prefix).
     1 guiding item ↔ 1 unique stimulus, and NO stimulus is shared across lessons. [597/597]
   • Quiz items (quiz_<n>) carry ZERO grouping signal in their payload — no lessonId,
@@ -177,7 +177,7 @@ def _order_group(g):
 
 # ───────────────────────── assemble one lesson dict ────────────────────────────
 def _lesson_from_group(group, stim_by_id, vendor_id, title):
-    """Turn one grouped {guiding,quiz} into an arpack lesson dict (zero reshaping for Mayank)."""
+    """Turn one grouped {guiding,quiz} into an arpack lesson dict (parses the generator's native grouping)."""
     g_specs, missing = [], []
     for f, p, r in group["guiding"]:
         sid = _stim_id_of(p)

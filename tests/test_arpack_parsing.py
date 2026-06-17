@@ -1,6 +1,7 @@
 """QTI 3.0 parsing tests for arpack — the single source of truth for ingesting Mayank's items.
 
-Covers: format auto-detection (all 7 r2 families), the fail-closed answer-key bridge,
+Covers: format auto-detection for the families exercised here (choice/msq/ebsr/text-entry); see
+test_all7_fixture.py for the wider format set. Plus the fail-closed answer-key bridge,
 and the hardened prompt/choice extraction edge cases (feedback-in-choice, div.stem stems,
 multi-paragraph/MathML choices, namespace quirks).
 """

@@ -27,18 +27,20 @@ PIPELINE
 
 PROPERTIES (all four, by construction)
   * fan-out per lesson (parallel)  — ThreadPoolExecutor.
-  * idempotent                     — deterministic ids end-to-end (request_ids -> re-stamped leaf
-                                     ids); a re-run converges to the same package, byte-for-byte.
+  * idempotent                     — deterministic, collision-free ids end-to-end (request_ids ->
+                                     re-stamped leaf ids), so a re-run converges to the same course.json
+                                     + items byte-for-byte (asserted by test_orchestrator_idempotent_byte_for_byte).
   * fail-closed                    — a lesson that fails its per-lesson shape/parse gate is REPORTED
                                      and EXCLUDED from assembly, never silently shipped; the final
                                      arpack.validate is the hard gate — NOTHING emits if it fails.
   * draft-safe                     — the course title is force-prefixed STAN-PROBE-DELETEME (matches
                                      arpack.THROWAWAY_PREFIX) so any later push lands as a throwaway.
 
-PLUGGABLE GENERATOR (proven, not promised): generator_client.generate(req, backend) has two backends.
-  stub (default) runs the WHOLE pipeline on Mayank's real-shaped QTI today. real is a one-line swap
-  (GEN_BACKEND=real or --backend real). The orchestrator never branches on backend internals — it
-  just calls generate(); the return shape is identical, so the swap touches nothing here.
+PLUGGABLE GENERATOR: generator_client.generate(req, backend) has two backends. The stub backend
+  (default) runs the FULL pipeline on Mayank's real-shaped QTI today; the 'real' backend is a
+  documented, not-yet-wired one-line swap (GEN_BACKEND=real or --backend real). The orchestrator never
+  branches on backend internals — it just calls generate(); the return shape is identical, so the swap
+  touches nothing here.
 """
 from __future__ import annotations
 
