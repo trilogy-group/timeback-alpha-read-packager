@@ -61,10 +61,12 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   round-tripped lesson); the one-command orchestrator (stub generator) builds a package that passes the
   fail-closed validator; cross-checked against Ilma's skill (her corrections adopted where we differed);
   the full test suite + `run_all.sh`'s four layers pass.
-- **Server-validated (demo tenant):** the generated QTI for all 6 of Anirudh's sample formats (incl. the
-  raw-XML hot-text/match/EBSR) was imported to a **TimeBack Content surface** — [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/skill_pack/pack/SKILL.md),
-  `demo` tenant — via its `qti-package` import. The platform's QTI QC returned `trust_status: "trusted"`
-  (`problem_code: null`), items `published`, student-view with answer keys hidden. Real TimeBack QC, sandbox tenant.
+- **Server-validated (demo tenant):** the QTI for all 6 sample formats (incl. raw-XML hot-text/match/EBSR)
+  imports QC-trusted to a **TimeBack Content surface** — [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/skill_pack/pack/SKILL.md),
+  `demo` tenant — via its `qti-package` import: `trust_status: "trusted"` (`problem_code: null`), items
+  `published`, student-view with answer keys hidden. Confirmed for **both** the bridge-generated QTI
+  (`examples/g3v2_demo_bridge.py`) **and the production `incept-qti-sdk` package** (6 items, real ELA sample),
+  which our packager also parses clean. Real TimeBack QC, sandbox tenant — **not** the live Alpha Read renderer.
 - **Open / unverified:** the **live Alpha Read production** push (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`)
   is still pending — it's cred-gated. Whether the Alpha Read app **renders** the tech-enhanced formats is the
   open renderer probe (needs a test-student account); a full multi-lesson course end-to-end awaits the live
