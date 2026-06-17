@@ -13,20 +13,33 @@ Ilma's `incept-timeback-plugin` skill (where we differed, she won — correction
 ## The model (verified, do not deviate)
 `Course (alpha_read markers + publish flags) → flat units → resource per lesson (lessonType:"alpha-read-article") → QTI assessment-test → items + stimulus`.
 - Per lesson: **3–6 guiding** items (1 passage + 1 MCQ each, carries a stimulus-ref) **+ exactly 4 quiz** items (no stimulus).
-- Items: **MCQ (single) + MSQ (multi-correct)** verified; other r2 formats accepted (`fill-in/hot-text/drag-to-order/match/ebsr`). Answer key from `qti-correct-response`.
+- Items: **all 7 r2 formats** handled end-to-end via Ilma's RULE 1 split — JSON-safe (`choice`/`order`/`extended-text`/single-blank `text-entry`) emit JSON; the rest (`hot-text`/`match`/`ebsr`/… + multi-blank `text-entry`) ride as raw `<qti-assessment-item>` XML verbatim. Answer key from `qti-correct-response`.
 - Every item carries its **question stem** in `interaction.questionStructure.prompt` (Ilma's JSON template shape, create-mcq.md); options nest in `questionStructure.choices`. A stemless item renders as naked options — the validator fail-closes on it.
 - **App ownership (Ramish breaking change, ≥2026-06-30):** root `course.primaryApp` is the ONLY ownership setter and must be exactly `"alpha_read"`; `metadata.primaryApp` is now **inert** (mirrored for pre-cutover servers, forward-safe to drop).
 - Passage HTML ⊆ `div/p/h1/h2/strong/em/br/blockquote` + MathML; **images must be S3 URLs** (no other media). Standards do **not** serialise (live course tags none).
 
 ## Run it
-1. **Ingest Mayank's output (no reshaping):** `output_dir_ingester.from_timeback_build_output(dir)` reads his `manifest.json` + `items/*.xml` + `stimuli/*.xml`. Or one item: `arpack.from_qti_xml(xml)` → `{identifier,title,role,stimulus_ref,prompt,choices,correct_id(s)}` (role auto-inferred; `adapt_qti_item` **raises** if the key isn't among choices).
-2. **Ingest Anirudh's skeleton:** `skeleton_adapter.from_skeleton_table("expeditions.csv")` → units (band→Lexile, genre, coverage).
+1. **Ingest the generator output (no reshaping):** `output_dir_ingester.from_timeback_build_output(dir)` reads its `manifest.json` + `items/*.xml` + `stimuli/*.xml`. Or one item: `arpack.from_qti_xml(xml)` → `{identifier,title,role,stimulus_ref,prompt,choices,correct_id(s)}` (role auto-inferred; `adapt_qti_item` **raises** if the key isn't among choices).
+2. **Ingest the skeleton:** `skeleton_adapter.from_skeleton_table("expeditions.csv")` → units (band→Lexile, genre, coverage).
 3. **Assemble → validate → emit:** `python3 src/arpack.py build skeleton.json out/` (fail-closed validator runs first). Or **one command**: `python3 src/course_orchestrator.py skeleton.json out/`.
 
 ## Validator rejects (fail-closed)
 non-S3 media · MCQ <2 choices · key not among choices · **missing question stem** (`interaction.questionStructure.prompt`) ·
 missing markers/publish flags · **root `primaryApp` not exactly `"alpha_read"`** (null/empty/non-string/alias→422) ·
 authored `metadata.metrics` · id-coupling breaks · wrong section structure · content/prompt not well-formed XHTML after sanitize.
+
+## Item checklist — what's enforced where
+**[pack]** packager `validate()`, fail-closed · **[gen]** generation / the jsonl→QTI transform (the packager can't see it; InceptBench doesn't check it either) · **[probe]** live render in AlphaRead, unconfirmed until the test-student probe.
+
+- **Every item:** [pack] one of the 7 types with correct RULE 1 routing; well-formed XML; stem present; root id matches the ref; every `<img>` is an https **S3** URL (no relative paths, no other media). [gen] near-neighbour distractors; Grade-3 Lexile.
+- **MCQ/MSQ (`choice`):** [pack] key ⊆ options; exactly 1 key (MCQ) / ≥1 (MSQ); ≥2 options.
+- **Drag-to-order (`order`):** [pack] cardinality `ordered`; key ranks every option.
+- **Fill-in (`text-entry`):** [pack] ≥1 non-empty accepted answer; single-blank → JSON, multi-blank → XML with **per-blank** keys (blank N never accepts blank M's answer).
+- **Hot-text / match / EBSR (XML-only):** [pack] checks **only** that the envelope is well-formed QTI, has a matching identifier, and is S3-clean — it does **not** inspect the answer key or options (RULE 1). Content correctness is therefore [gen]: hot-text's correct token IS the evidence span; match pairs are complete + unambiguous; **EBSR Part B options are verbatim from the passage and depend on Part A**. [probe] all three: does AlphaRead render them?
+- **`write_prompt` (Day-2 Read & Write):** 1 MCQ (name the text structure) + 1 hot-text (click the proof) — no typing. Both rows above apply; the hot-text [probe] is the load-bearing unknown.
+- **Course:** [pack] root `primaryApp:"alpha_read"`; publish flags; 3–6 guiding + exactly 4 quiz per lesson; resource↔test id-coupling; no duplicate ids; `lessonType:"alpha-read-article"`.
+
+The headline: the packager guarantees items are **well-formed and shippable**; for hot-text/match/EBSR it does **not** vouch for content correctness — that's on generation, and IB doesn't check it.
 
 ## Render (live behavior — what AlphaRead shows)
 Vertical article→question→unlock. Per lesson: passage + MCQs. The QTI API accepts the tech-enhanced formats,
@@ -40,7 +53,7 @@ but **whether AlphaRead renders them is unverified** — the open
 - **G3** the question **stem** is emitted into `interaction.questionStructure.prompt` (+ options under `questionStructure.choices`) — Ilma's JSON template (create-mcq.md / create-frq.md). Previously the parsed prompt was dropped on emit → items rendered as naked choices. Now fail-closed.
 - **A2** root `primaryApp` is the validator's **hard gate** (exact `"alpha_read"`; null/empty/non-string/alias → 422); `metadata.primaryApp` relaxed to **inert/optional** (package valid if dropped; flagged only if present-and-wrong).
 - **D4** item-ref `href` = bare `{id}.xml`; **D5** MCQ choice floor relaxed to ≥2; resource `url` → https.
-- **LATENT (D1/D2 — tracked, fires before any non-choice item ships):** Ilma RULE 1 fixes the JSON-safe set at exactly **`choice` / `extended-text` / `order` / `text-entry`**. arpack *also* emits `hottext / match / associate / inline-choice / gap-match / ebsr` as JSON dicts — those MUST POST raw **XML** (the JSON→XML converter silently corrupts their scoring). Our shipping content today is MCQ/MSQ (`choice`) + `text-entry` = all JSON-safe, so this does not bite yet. Two residual EBSR specifics to fix on the XML path: (1) `responseProcessing.templateType:"map_response"` is **not** a real Ilma template (she uses `match_correct`); (2) EBSR is a composite, XML-only. Until then the validator accepts these types (so the emitter is forward-ready), but the **push** must branch to XML for anything outside the 4 JSON-safe types.
+- **D1/D2 (Ilma RULE 1 — IMPLEMENTED):** JSON-safe is exactly `choice` / `extended-text` / `order` / single-blank `text-entry` → emitted as JSON. `hottext` / `match` / `associate` / `inline-choice` / `gap-match` / `ebsr` / `select-point` **and multi-blank `text-entry`** → emitted as the raw-XML envelope `{"format":"xml","xml":<rawXml>}`, carried byte-verbatim (the JSON→XML converter corrupts their scoring otherwise). The invented `map_response` template is gone (Ilma uses `match_correct`). The split is decided **per item** (`_is_xml_only`); `validate()` checks XML-only items as a well-formed envelope, not as a JSON option model.
 
 ## Push — via Ilma's `/timeback` skill, NOT hand-rolled
 `arpack` is a clean offline emitter. The upload is Ilma's surface (45+ nightly tests vs the live API): she
