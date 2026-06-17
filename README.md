@@ -7,6 +7,9 @@ It also pushes live (verified 2026-06-17). Note the scope gap: the package can c
 formats**, but the Alpha Read **reading** renderer displays a narrower set — **single-select `choice` + `order`** —
 so for reading content, target those (the packager auto-decomposes EBSR → two choice items). See *Render reality*.
 
+> **Publishing to Alpha Read? Read [`RULES.md`](RULES.md) first** — the evidence-tagged rules for what
+> renders (single-select choice + order only), what to author, and the exact publish command.
+
 ## Start here — the three docs, most important first
 1. **`skill.md`** — the installable Claude skill + the hard rules. **Read this first.** Drop it into
    `~/.claude/skills/timeback-alpha-read-packager/` (or `claude plugin add`) and an agent can drive the
