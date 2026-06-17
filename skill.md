@@ -6,7 +6,8 @@ description: Package QTI items + a course skeleton into a complete TimeBack Alph
 # TimeBack Alpha Read Packager — skill
 
 Turn QTI items (`incept-qti-sdk` output) + a course skeleton (an expedition table) into a
-complete Alpha Read course (OneRoster v1p2 + QTI 3.0) that passes the offline, fail-closed `validate()` — shape-match, never POSTed to a server.
+complete Alpha Read course (OneRoster v1p2 + QTI 3.0) that passes the offline, fail-closed `validate()` — and
+renders end-to-end in the live Alpha Read student app (verified 2026-06-17 with the real ELA sample).
 
 ## Invoke when
 - assembling or validating a Grade-3 reading course for AlphaRead
@@ -39,6 +40,8 @@ Read **`agent.qmd`** (contract, invariants, the applied cross-check corrections,
 - **UPLOAD — two targets.** *Demo (proven, no real creds):* import the QTI to the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
   `demo` tenant — `POST /dev/mint?tenantId=demo`, then `POST …/imports/qti-package` (`Content-Type: application/xml`
   + `Idempotency-Key` + raw item XML); read back `…/trust` (expect `trusted`) + `…/student-view`. Real TimeBack QC,
-  sandbox tenant — not the live Alpha Read app. *Live (production):* push via **Ilma's `/timeback` skill** — do NOT
-  hand-roll. She owns auth, push-order, JSON-vs-XML branching, and the gotchas (200 OK ≠ rendered). Push only to a
-  `STAN-PROBE-DELETEME…` draft, `POST /validate` first, write creds via gitignored `.env`.
+  sandbox tenant — not the live Alpha Read app. *Live (production, verified e2e):* `examples/push_to_timeback.py`
+  automates the full push (course→items→test→resource→component-resource [+ `--enroll-student`]), implementing
+  Ilma's [/timeback](https://github.com/ilmych/incept-timeback-plugin) push order (her skill stays canonical).
+  **Render gotcha:** the QTI test + OneRoster resource + component-resource must all share the id `article_<N>`
+  (`vendorResourceId=<N>`) or the student app 404s. Draft (`STAN-PROBE-DELETEME…`) only; creds via gitignored `.env`.
