@@ -46,6 +46,9 @@ The headline: the packager guarantees items are **well-formed and shippable**; f
 Vertical article→question→unlock. Per lesson: passage + MCQs. The QTI API accepts the tech-enhanced formats,
 but **whether AlphaRead renders them is unverified** — the open
 **renderer probe** (needs a test-student account, not real children). Keep MCQ/MSQ as the safe default.
+The reading-course export we sampled is all MCQ, but a MAP-equivalent assessment build in
+`trilogy-group/alpha_courses/grade-3-reading/alpha_read_build` already authors hot-text / match / ebsr /
+order (sampled, not exhaustively checked) — so the all-7 path and the renderer probe gate real content, not just fixtures.
 
 ## Cross-check vs Ilma's skill — corrections APPLIED
 - **D3** component-resource links carry `status:"active"` + `metadata.lessonType` (else 422).
