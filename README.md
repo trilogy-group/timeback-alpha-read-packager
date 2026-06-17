@@ -84,10 +84,12 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   `Content-Type: application/xml`, an `Idempotency-Key` header, and the raw item XML as the body (the server
   parses — don't parse locally). Read back `…/trust` (expect `trusted`) and `…/student-view`. Sandbox tenant,
   no real creds, throwaway data — real TimeBack QC, but **not** the live Alpha Read app.
-- **Live Alpha Read (production):** push via **Ilma's `/timeback` skill**
-  ([incept-timeback-plugin](https://github.com/ilmych/incept-timeback-plugin)), not hand-rolled — she owns
-  auth, push order, and JSON-vs-XML branching. Pre-flight `POST /validate`; write-scoped Cognito creds via a
-  gitignored `.env`; push only to a `STAN-PROBE-DELETEME…` draft; then open one lesson as a test student (200 ≠ rendered).
+- **Live Alpha Read (production):** automated by `examples/push_to_timeback.py` (implements Ilma's
+  [incept-timeback-plugin](https://github.com/ilmych/incept-timeback-plugin) push order — her `/timeback`
+  skill stays the canonical surface): `python3 examples/push_to_timeback.py --package qti_package/ --org
+  <viewer-org-sourcedId> --verify`. Creds from a gitignored `.env`; idempotent + checkpointed + 409=success;
+  pushes only a `STAN-PROBE-DELETEME` draft. **Org gotcha:** the draft must land in an org the viewer belongs
+  to (a foreign org → AlphaBuild "Access denied"). Verified 2026-06-17: renders in AlphaBuild, QTI **Valid**.
 
 ## Layout
 ```

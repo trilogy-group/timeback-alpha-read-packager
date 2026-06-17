@@ -79,7 +79,10 @@ Pre-flight: write-scoped Cognito client (via gitignored `.env`) + `POST /validat
 test → `…/api/assessment-tests`; stimuli → `…/api/stimuli` (`{identifier,title,content}`); OneRoster course/
 components/resources(`/resources/v1p2/resources/`)/links under `…/rostering/v1p2/...`. **Org gotcha:** a draft
 must be created in an org the viewer belongs to — the documented example org returned "Access denied" in
-AlphaBuild; using the viewer's own org rendered fine.
+AlphaBuild; using the viewer's own org rendered fine. **Automated** as `examples/push_to_timeback.py`
+(idempotent · checkpointed · 409=success · draft-guarded · `--verify` read-back): e.g.
+`python3 examples/push_to_timeback.py --package qti_package/ --org <viewer-org-sourcedId> --verify`,
+creds from a gitignored `.env`.
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
