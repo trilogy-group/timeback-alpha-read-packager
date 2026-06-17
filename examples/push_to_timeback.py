@@ -109,8 +109,11 @@ def main():
     # vendorResourceId is the BARE NUMBER (create-course.md). So the test id MUST be article_<N> and the
     # resource's vendorResourceId MUST be <N> — else the student app 404s ("article does not exist").
     ARTNUM = (re.sub(r"\D", "", P) or "90000001")[-12:]
-    TEST = "article_" + ARTNUM
-    COURSE, UNIT, LESSON, RES, LINK = P, P + "-unit-1", P + "-unit-1-lesson-1", P + "-res", P + "-link"
+    # The Alpha Read DASHBOARD derives each article's link (articleId + crsid) from the OneRoster
+    # resource / component-resource sourcedIds — they MUST be `article_<N>` (same as the QTI test), or the
+    # dashboard generates a link with no articleId and the student app 404s. So test = resource = link = article_<N>.
+    TEST = RES = LINK = "article_" + ARTNUM
+    COURSE, UNIT, LESSON = P, P + "-unit-1", P + "-unit-1-lesson-1"
     state = json.load(open(a.checkpoint)) if os.path.exists(a.checkpoint) else {}
     tok, scopes = mint_token()
     print("token OK | scopes:", scopes or "(none)")

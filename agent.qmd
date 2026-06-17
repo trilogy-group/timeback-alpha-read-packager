@@ -89,10 +89,13 @@ child — and the student LOGIN is a human step, not automatable). The OneRoster
 **Alpha Read render gotcha (the #1 student-app 404):** a resource's `vendorResourceId` must be the BARE
 NUMBER `<N>` and its QTI test must live at id `article_<N>` — the student app fetches
 `assessment-tests/article_<vendorResourceId>`. Using the test id (non-numeric) as `vendorResourceId` →
-"article does not exist". The tool now emits `test=article_<N>`, `vendorResourceId=<N>`. The student-app URL needs BOTH params:
-`https://alpharead.alpha-1edtech.ai/articles?articleId=<N>&crsid=article_<N>`. **Verified 2026-06-17:** the
-real ELA article renders end-to-end in the Alpha Read student app (passage → guiding-question unlock flow,
-25-step reading session, step types matching the live article).
+"article does not exist". The tool now emits `test=article_<N>`, `vendorResourceId=<N>`. **The OneRoster resource AND component-resource
+sourcedIds must ALSO be `article_<N>`** (same as the test): the Alpha Read DASHBOARD derives each article's
+link from them — with `-res`/`-link` ids it builds a link with no `articleId` → 404, even though the direct
+`?articleId=<N>&crsid=article_<N>` URL works. So test = resource = component-resource = `article_<N>`. The
+student-app URL is `https://alpharead.alpha-1edtech.ai/articles?articleId=<N>&crsid=article_<N>`.
+**Verified 2026-06-17:** clicking the course in the dashboard renders the real ELA article end-to-end
+(passage → guiding-question unlock flow, 25-step reading session, step types matching the live article).
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
