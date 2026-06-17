@@ -86,6 +86,10 @@ AlphaBuild; using the viewer's own org rendered fine. **Automated** as `examples
 term→class→enrollment so the course surfaces in the student app (use a TEST student you own; never a real
 child — and the student LOGIN is a human step, not automatable). The OneRoster class needs `org` (not just
 `school`) and its `terms` must be in the same org (so the tool mints a draft term in `--org`).
+**Alpha Read render gotcha (the #1 student-app 404):** a resource's `vendorResourceId` must be the BARE
+NUMBER `<N>` and its QTI test must live at id `article_<N>` — the student app fetches
+`assessment-tests/article_<vendorResourceId>`. Using the test id (non-numeric) as `vendorResourceId` →
+"article does not exist". The tool now emits `test=article_<N>`, `vendorResourceId=<N>`.
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).

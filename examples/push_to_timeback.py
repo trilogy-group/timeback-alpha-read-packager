@@ -105,7 +105,12 @@ def main():
         sys.exit("Refusing: --prefix must start with STAN-PROBE-DELETEME (or pass --allow-non-draft).")
 
     P = a.prefix
-    COURSE, UNIT, LESSON, TEST, RES, LINK = P, P + "-unit-1", P + "-unit-1-lesson-1", P + "-test", P + "-res", P + "-link"
+    # Alpha Read renders an article by fetching assessment-tests/article_<vendorResourceId>, where
+    # vendorResourceId is the BARE NUMBER (create-course.md). So the test id MUST be article_<N> and the
+    # resource's vendorResourceId MUST be <N> — else the student app 404s ("article does not exist").
+    ARTNUM = (re.sub(r"\D", "", P) or "90000001")[-12:]
+    TEST = "article_" + ARTNUM
+    COURSE, UNIT, LESSON, RES, LINK = P, P + "-unit-1", P + "-unit-1-lesson-1", P + "-res", P + "-link"
     state = json.load(open(a.checkpoint)) if os.path.exists(a.checkpoint) else {}
     tok, scopes = mint_token()
     print("token OK | scopes:", scopes or "(none)")
@@ -155,9 +160,9 @@ def main():
         "course": {"sourcedId": COURSE}, "parent": {"sourcedId": UNIT}, "courseComponent": {"sourcedId": UNIT},
         "metadata": {}}}, "lesson:" + LESSON, tok, state, a.checkpoint)
     post(OR + "/resources/v1p2/resources/", {"resource": {
-        "sourcedId": RES, "status": "active", "title": a.title, "importance": "primary", "vendorResourceId": TEST,
-        "metadata": {"type": "qti", "subType": "qti-test", "lessonType": "alpha-read-article",
-                     "url": QTI + "/assessment-tests/" + TEST}}}, "res:" + RES, tok, state, a.checkpoint)
+        "sourcedId": RES, "status": "active", "title": a.title, "importance": "primary", "vendorResourceId": ARTNUM,
+        "metadata": {"type": "qti", "subType": "qti-test", "lessonType": "alpha-read-article", "xp": 12,
+                     "questionType": "custom", "url": QTI + "/assessment-tests/" + TEST}}}, "res:" + RES, tok, state, a.checkpoint)
     post(OR + "/rostering/v1p2/courses/component-resources", {"componentResource": {
         "sourcedId": LINK, "status": "active", "title": a.title, "sortOrder": 1,
         "resource": {"sourcedId": RES}, "courseComponent": {"sourcedId": LESSON},
