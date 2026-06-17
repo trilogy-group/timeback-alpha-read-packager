@@ -79,11 +79,12 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   A test student (own profile, `student` role) is enrolled via term→class→enrollment
   (`push_to_timeback.py --enroll-student <userId>`). Only the student **login** is non-automatable.
 - **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator.
-  *Gotchas baked into the tool:* the QTI test **and** the OneRoster resource **and** the component-resource
-  must all share the id `article_<N>` with `vendorResourceId=<N>` (the dashboard derives each article's
-  `articleId`+`crsid` from those ids — non-`article_<N>` ids → student-app 404 even though the direct URL
-  works); the student URL needs both `articleId` + `crsid`; a draft must land in an org the viewer belongs to;
-  a class's `terms` must share the class's `org`.
+  *Gotchas baked into the tool:* **one article = one passage + its questions** — group items by stimulus-ref;
+  putting unrelated passages in one article renders as an incoherent jumble. The QTI test **and** the OneRoster
+  resource **and** the component-resource must all share the id `article_<N>` with `vendorResourceId=<N>` (the
+  dashboard derives each article's `articleId`+`crsid` from those ids — non-`article_<N>` ids → student-app 404
+  even though the direct URL works); the student URL needs both `articleId` + `crsid`; a draft must land in an
+  org the viewer belongs to; a class's `terms` must share the class's `org`.
 
 ## Upload — two real targets
 - **Demo (proven):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's

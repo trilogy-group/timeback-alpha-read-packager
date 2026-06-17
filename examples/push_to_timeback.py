@@ -105,15 +105,13 @@ def main():
         sys.exit("Refusing: --prefix must start with STAN-PROBE-DELETEME (or pass --allow-non-draft).")
 
     P = a.prefix
-    # Alpha Read renders an article by fetching assessment-tests/article_<vendorResourceId>, where
-    # vendorResourceId is the BARE NUMBER (create-course.md). So the test id MUST be article_<N> and the
-    # resource's vendorResourceId MUST be <N> — else the student app 404s ("article does not exist").
-    ARTNUM = (re.sub(r"\D", "", P) or "90000001")[-12:]
-    # The Alpha Read DASHBOARD derives each article's link (articleId + crsid) from the OneRoster
-    # resource / component-resource sourcedIds — they MUST be `article_<N>` (same as the QTI test), or the
-    # dashboard generates a link with no articleId and the student app 404s. So test = resource = link = article_<N>.
-    TEST = RES = LINK = "article_" + ARTNUM
-    COURSE, UNIT, LESSON = P, P + "-unit-1", P + "-unit-1-lesson-1"
+    # Render rules (verified 2026-06-17): Alpha Read fetches assessment-tests/article_<vendorResourceId>
+    # (vendorResourceId = BARE NUMBER) and the DASHBOARD derives each article's link from the OneRoster
+    # resource/component-resource sourcedIds — so per article: test = resource = component-resource = article_<N>.
+    # AND one article must be ONE passage + its questions (items sharing a stimulus-ref); unrelated passages in
+    # one article render as an incoherent jumble. So we GROUP items by stimulus-ref → one article per passage.
+    base = (re.sub(r"\D", "", P) or "90000001")[-10:]
+    COURSE, UNIT = P, P + "-unit-1"
     state = json.load(open(a.checkpoint)) if os.path.exists(a.checkpoint) else {}
     tok, scopes = mint_token()
     print("token OK | scopes:", scopes or "(none)")
@@ -128,27 +126,22 @@ def main():
         post(QTI + "/stimuli", {"identifier": sid, "title": title,
              "content": (m.group(1).strip() if m else "<p></p>")}, "stim:" + sid, tok, state, a.checkpoint)
 
-    print("--- items (verbatim XML) ---")
-    item_ids = []
+    print("--- items (verbatim XML) + group by passage (stimulus-ref) ---")
+    from collections import OrderedDict
+    groups, item_ids = OrderedDict(), []
     for f in sorted(glob.glob(os.path.join(a.package, "items", "*.xml"))):
         raw = open(f, encoding="utf-8-sig").read()
         iid = re.search(r'identifier="([^"]+)"', raw).group(1)
+        ititle = (re.search(r'title="([^"]+)"', raw) or [None, iid])[1]
+        sref = re.search(r'qti-assessment-stimulus-ref[^>]*identifier="([^"]+)"', raw)
+        groups.setdefault(sref.group(1) if sref else iid, []).append((iid, ititle))
         item_ids.append(iid)
         post(QTI + "/assessment-items", {"format": "xml", "xml": raw}, "item:" + iid, tok, state, a.checkpoint)
     if not item_ids:
         sys.exit("No items/*.xml found in package.")
+    print("  -> %d item(s) in %d passage-group(s) = %d article(s)" % (len(item_ids), len(groups), len(groups)))
 
-    print("--- test ---")
-    post(QTI + "/assessment-tests", {
-        "identifier": TEST, "title": a.title,
-        "qti-test-part": [{"identifier": "tp1", "navigationMode": "nonlinear", "submissionMode": "individual",
-            "qti-assessment-section": [{"identifier": "sec1", "title": "Items", "visible": True, "required": True,
-                "fixed": False, "sequence": 1,
-                "qti-assessment-item-ref": [{"identifier": i, "href": i + ".xml"} for i in item_ids]}]}],
-        "qti-outcome-declaration": [{"identifier": "SCORE", "cardinality": "single", "baseType": "float"}],
-    }, "test:" + TEST, tok, state, a.checkpoint)
-
-    print("--- oneroster course graph ---")
+    print("--- oneroster course + unit ---")
     post(OR + "/rostering/v1p2/courses", {"course": {
         "sourcedId": COURSE, "status": "active", "title": a.title, "courseCode": COURSE,
         "grades": ["3"], "subjects": ["Reading"], "org": {"sourcedId": a.org}, "primaryApp": "alpha_read",
@@ -158,18 +151,35 @@ def main():
         "sourcedId": UNIT, "status": "active", "title": "Unit 1", "sortOrder": 1,
         "course": {"sourcedId": COURSE}, "parent": None, "courseComponent": None, "metadata": {}}},
         "unit:" + UNIT, tok, state, a.checkpoint)
-    post(OR + "/rostering/v1p2/courses/components", {"courseComponent": {
-        "sourcedId": LESSON, "status": "active", "title": "Lesson 1", "sortOrder": 1,
-        "course": {"sourcedId": COURSE}, "parent": {"sourcedId": UNIT}, "courseComponent": {"sourcedId": UNIT},
-        "metadata": {}}}, "lesson:" + LESSON, tok, state, a.checkpoint)
-    post(OR + "/resources/v1p2/resources/", {"resource": {
-        "sourcedId": RES, "status": "active", "title": a.title, "importance": "primary", "vendorResourceId": ARTNUM,
-        "metadata": {"type": "qti", "subType": "qti-test", "lessonType": "alpha-read-article", "xp": 12,
-                     "questionType": "custom", "url": QTI + "/assessment-tests/" + TEST}}}, "res:" + RES, tok, state, a.checkpoint)
-    post(OR + "/rostering/v1p2/courses/component-resources", {"componentResource": {
-        "sourcedId": LINK, "status": "active", "title": a.title, "sortOrder": 1,
-        "resource": {"sourcedId": RES}, "courseComponent": {"sourcedId": LESSON},
-        "metadata": {"lessonType": "alpha-read-article"}}}, "link:" + LINK, tok, state, a.checkpoint)
+
+    print("--- articles (one per passage: test + lesson + resource + component-resource = article_<N>) ---")
+    articles = []
+    for i, (key, members) in enumerate(groups.items(), 1):
+        N = base + "%02d" % i
+        ART, LES = "article_" + N, P + "-lesson-%02d" % i
+        iids = [m[0] for m in members]
+        title = members[0][1] or a.title
+        post(QTI + "/assessment-tests", {"identifier": ART, "title": title,
+            "qti-test-part": [{"identifier": "tp1", "navigationMode": "nonlinear", "submissionMode": "individual",
+                "qti-assessment-section": [{"identifier": "sec1", "title": title, "visible": True, "required": True,
+                    "fixed": False, "sequence": 1,
+                    "qti-assessment-item-ref": [{"identifier": x, "href": x + ".xml"} for x in iids]}]}],
+            "qti-outcome-declaration": [{"identifier": "SCORE", "cardinality": "single", "baseType": "float"}]},
+            "test:" + ART, tok, state, a.checkpoint)
+        post(OR + "/rostering/v1p2/courses/components", {"courseComponent": {
+            "sourcedId": LES, "status": "active", "title": title, "sortOrder": i,
+            "course": {"sourcedId": COURSE}, "parent": {"sourcedId": UNIT}, "courseComponent": {"sourcedId": UNIT},
+            "metadata": {}}}, "lesson:" + LES, tok, state, a.checkpoint)
+        post(OR + "/resources/v1p2/resources/", {"resource": {
+            "sourcedId": ART, "status": "active", "title": title, "importance": "primary", "vendorResourceId": N,
+            "metadata": {"type": "qti", "subType": "qti-test", "lessonType": "alpha-read-article", "xp": 12,
+                         "questionType": "custom", "url": QTI + "/assessment-tests/" + ART}}},
+            "res:" + ART, tok, state, a.checkpoint)
+        post(OR + "/rostering/v1p2/courses/component-resources", {"componentResource": {
+            "sourcedId": ART, "status": "active", "title": title, "sortOrder": 1,
+            "resource": {"sourcedId": ART}, "courseComponent": {"sourcedId": LES},
+            "metadata": {"lessonType": "alpha-read-article"}}}, "cr:" + ART, tok, state, a.checkpoint)
+        articles.append((N, ART, title, len(iids)))
 
     if a.enroll_student:
         # Make the course surface in the student app: term (in --org) -> class (course+org+term) -> enrollment.
@@ -193,16 +203,14 @@ def main():
     if a.verify:
         print("--- verify (read-back) ---")
         sc, _ = get_json(OR + "/rostering/v1p2/courses/" + COURSE, tok); print("  course GET:", sc)
-        sc, d = get_json(QTI + "/assessment-tests/" + TEST, tok)
-        refs = (((d or {}).get("qti-test-part") or [{}])[0].get("qti-assessment-section") or [{}])[0].get("qti-assessment-item-ref", []) if d else []
-        print("  test GET:", sc, "| item refs:", len(refs))
+        for N, ART, title, n in articles:
+            sc, _ = get_json(QTI + "/assessment-tests/" + ART, tok); print("  test %s GET: %s" % (ART, sc))
 
-    print("\n=== DONE ===")
+    print("\n=== DONE === %d article(s), one per passage" % len(articles))
     print("AlphaBuild course   :", "https://app.alpha-build.org/content/" + COURSE)
-    print("Quiz items (preview):", "https://app.alpha-build.org/questionbanks/%s/question/%s" % (TEST, item_ids[0]))
     # The Alpha Read STUDENT app needs BOTH articleId=<N> and crsid=article_<N> (verified 2026-06-17).
-    print("Alpha Read (student):", "https://alpharead.alpha-1edtech.ai/articles?articleId=%s&crsid=%s" % (ARTNUM, TEST))
-    print("items:", len(item_ids))
+    for N, ART, title, n in articles:
+        print("  %-32s (%dq) -> https://alpharead.alpha-1edtech.ai/articles?articleId=%s&crsid=%s" % (title[:32], n, N, ART))
 
 
 if __name__ == "__main__":

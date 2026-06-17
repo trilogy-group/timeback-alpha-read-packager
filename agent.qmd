@@ -94,6 +94,9 @@ sourcedIds must ALSO be `article_<N>`** (same as the test): the Alpha Read DASHB
 link from them — with `-res`/`-link` ids it builds a link with no `articleId` → 404, even though the direct
 `?articleId=<N>&crsid=article_<N>` URL works. So test = resource = component-resource = `article_<N>`. The
 student-app URL is `https://alpharead.alpha-1edtech.ai/articles?articleId=<N>&crsid=article_<N>`.
+**One article = one passage + its questions** — `push_to_timeback.py` groups items by stimulus-ref into one
+article per passage; lumping unrelated passages into a single article renders as an incoherent jumble (the
+sample is a 7-item *format showcase*, not one article — each item has its own passage).
 **Verified 2026-06-17:** clicking the course in the dashboard renders the real ELA article end-to-end
 (passage → guiding-question unlock flow, 25-step reading session, step types matching the live article).
 
