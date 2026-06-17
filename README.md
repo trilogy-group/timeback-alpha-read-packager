@@ -71,11 +71,15 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   was pushed to **live Alpha Read** (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`) as a `STAN-PROBE-DELETEME`
   draft — 6 items (verbatim XML POST) + test + a full OneRoster course/unit/lesson/resource/link, all 201. It
   **renders in AlphaBuild**: all 6 formats appear (Choice/Match/Order/Composite-EBSR/HotText), the QTI panel
-  shows **✅ Valid**, and the live preview renders the passage + question. (This is the authoring + preview
-  render; the student-facing Alpha Read app render still needs an enrolled test-student.)
-- **Open:** student-app render with an enrolled test-student; a full multi-lesson course end-to-end awaits the
-  live skeleton + full generator; org matters — a draft must land in an org the viewer belongs to (the example
-  org `346488d3…` returned "Access denied"; the viewer's own org renders fine).
+  shows **✅ Valid**, and the **"Preview (from Timeback) LIVE"** renders the real two-pane reading view
+  (passage + question + selectable options).
+- **Student render wired (2026-06-17):** a test student (own profile, `student` role) enrolled via
+  term→class→enrollment (`push_to_timeback.py --enroll-student <userId>`); the course surfaces in the
+  student's class list. The only non-automatable step is the student **login** (no agent account creation /
+  authentication as a student).
+- **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator. *Org gotcha:* a
+  draft must land in an org the viewer belongs to (the example org `346488d3…` → "Access denied"; the viewer's
+  own org renders); a class's `terms` must be in the class's `org`.
 
 ## Upload — two real targets
 - **Demo (proven):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's

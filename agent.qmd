@@ -81,11 +81,15 @@ components/resources(`/resources/v1p2/resources/`)/links under `…/rostering/v1
 must be created in an org the viewer belongs to — the documented example org returned "Access denied" in
 AlphaBuild; using the viewer's own org rendered fine. **Automated** as `examples/push_to_timeback.py`
 (idempotent · checkpointed · 409=success · draft-guarded · `--verify` read-back): e.g.
-`python3 examples/push_to_timeback.py --package qti_package/ --org <viewer-org-sourcedId> --verify`,
-creds from a gitignored `.env`.
+`python3 examples/push_to_timeback.py --package qti_package/ --org <viewer-org-sourcedId> --verify
+[--enroll-student <user-sourcedId>]`, creds from a gitignored `.env`. `--enroll-student` adds the
+term→class→enrollment so the course surfaces in the student app (use a TEST student you own; never a real
+child — and the student LOGIN is a human step, not automatable). The OneRoster class needs `org` (not just
+`school`) and its `terms` must be in the same org (so the tool mints a draft term in `--org`).
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
 - **Server-validated (demo tenant):** the QTI for all 6 sample formats (incl. raw-XML hot-text/match/ebsr) imports QC-trusted to the platform3 content-alpha `demo` tenant via `qti-package` — `trust_status:"trusted"`, `published`, student-view with answer keys hidden. Confirmed for both the bridge-generated QTI AND the production `incept-qti-sdk` package (6 items, real ELA sample), which our packager also parses clean. Real TimeBack QC, sandbox tenant — not the live Alpha Read renderer (that's the cred-gated live push).
 - **Live push + render (verified 2026-06-17):** the production package (6 items + 6 stimuli) pushed to live Alpha Read as a `STAN-PROBE-DELETEME` draft (all 201) and **renders in AlphaBuild** — all 6 formats present, QTI panel **Valid**, live preview shows the passage + question.
-- **Open:** student-app render with an enrolled test-student (the above is the authoring/preview render); a full multi-lesson course end-to-end awaits the live skeleton + full generator.
+- **Student render wired (2026-06-17):** a test student (own profile, `student` role) enrolled via term→class→enrollment; the course surfaces in the student's class list, and AlphaBuild's "Preview (from Timeback) **LIVE**" renders the real two-pane reading view (passage + question + selectable options). The only non-automatable step is the student **login** (agents must not create accounts or authenticate as students).
+- **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator.

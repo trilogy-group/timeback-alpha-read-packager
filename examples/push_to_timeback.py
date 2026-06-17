@@ -96,6 +96,9 @@ def main():
                     __import__("datetime").datetime.now().strftime("%Y%m%d-%H%M"))
     ap.add_argument("--checkpoint", default="/tmp/timeback_push_state.json")
     ap.add_argument("--allow-non-draft", action="store_true")
+    ap.add_argument("--enroll-student", default=None,
+                    help="OneRoster user sourcedId to enroll as a student (creates term+class+enrollment "
+                         "so the course surfaces in the student app). Use a TEST student you own — never a real child.")
     ap.add_argument("--verify", action="store_true")
     a = ap.parse_args()
     if not a.prefix.startswith("STAN-PROBE-DELETEME") and not a.allow_non_draft:
@@ -159,6 +162,25 @@ def main():
         "sourcedId": LINK, "status": "active", "title": a.title, "sortOrder": 1,
         "resource": {"sourcedId": RES}, "courseComponent": {"sourcedId": LESSON},
         "metadata": {"lessonType": "alpha-read-article"}}}, "link:" + LINK, tok, state, a.checkpoint)
+
+    if a.enroll_student:
+        # Make the course surface in the student app: term (in --org) -> class (course+org+term) -> enrollment.
+        # OneRoster: class requires `org`; terms must be in the same org (hence a draft term in --org).
+        TERM, CLASS, ENR = P + "-term", P + "-class", P + "-enr"
+        print("--- enroll student", a.enroll_student, "---")
+        post(OR + "/rostering/v1p2/academicSessions", {"academicSession": {
+            "sourcedId": TERM, "status": "active", "title": a.title + " Term", "type": "term",
+            "startDate": "2025-08-01", "endDate": "2026-06-30", "schoolYear": "2026",
+            "org": {"sourcedId": a.org}}}, "term:" + TERM, tok, state, a.checkpoint)
+        post(OR + "/rostering/v1p2/classes", {"class": {
+            "sourcedId": CLASS, "status": "active", "title": a.title, "classCode": CLASS, "classType": "scheduled",
+            "grades": ["3"], "subjects": ["Reading"], "course": {"sourcedId": COURSE},
+            "org": {"sourcedId": a.org}, "school": {"sourcedId": a.org}, "terms": [{"sourcedId": TERM}]}},
+            "class:" + CLASS, tok, state, a.checkpoint)
+        post(OR + "/rostering/v1p2/enrollments", {"enrollment": {
+            "sourcedId": ENR, "status": "active", "role": "student", "primary": True,
+            "user": {"sourcedId": a.enroll_student}, "class": {"sourcedId": CLASS},
+            "org": {"sourcedId": a.org}, "school": {"sourcedId": a.org}}}, "enroll:" + ENR, tok, state, a.checkpoint)
 
     if a.verify:
         print("--- verify (read-back) ---")
