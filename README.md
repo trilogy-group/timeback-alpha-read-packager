@@ -1,9 +1,11 @@
 # TimeBack Alpha Read Packager
 
 Turn **QTI items** + a **course skeleton** into a complete, **contract-valid TimeBack Alpha Read course**
-(OneRoster v1p2 + QTI 3.0). Offline, fail-closed (passes the offline validator; never yet POSTed) — the contract is
-reverse-engineered from a live production `Alpha Read – Grade 3` course export (1077 items) and cross-checked
-against Ilma's `incept-timeback-plugin` skill.
+(OneRoster v1p2 + QTI 3.0). Offline, fail-closed — the contract is reverse-engineered from a live production
+`Alpha Read – Grade 3` course export (1077 items) and cross-checked against Ilma's `incept-timeback-plugin` skill.
+It also pushes live (verified 2026-06-17). Note the scope gap: the package can carry **valid QTI for all 7 r2
+formats**, but the Alpha Read **reading** renderer displays a narrower set — **single-select `choice` + `order`** —
+so for reading content, target those (the packager auto-decomposes EBSR → two choice items). See *Render reality*.
 
 ## Start here — the three docs, most important first
 1. **`skill.md`** — the installable Claude skill + the hard rules. **Read this first.** Drop it into
@@ -40,10 +42,13 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
 
 ## The contract (the validator enforces all of it)
 - Per lesson: **3–6 guiding** (1 passage + 1 question each) **+ exactly 4 quiz** — the counts are enforced; the items we've sampled are four-option MCQs, but the validator accepts any of the 7 formats and a ≥2-option floor, not MCQ-ness or a fixed count of 4.
-- **All 7 r2 item formats end-to-end**, split by Ilma's RULE 1 *per item*: JSON-safe
+- **All 7 r2 item formats handled** (parse → validate → emit), split by Ilma's RULE 1 *per item*: JSON-safe
   (`choice`/`order`/`extended-text`/single-blank `text-entry`) emit JSON; the rest
   (`hot-text`/`match`/`ebsr`/… **and multi-blank fill-in**) carry the **raw item XML verbatim**
-  (`{"format":"xml","xml":…}`), so the API's lossy JSON→XML converter never corrupts their scoring.
+  (`{"format":"xml","xml":…}`), so the API's lossy JSON→XML converter never corrupts their scoring. (This is the
+  *packaging* contract — what **renders** in the Alpha Read reading app is the narrower single-select choice +
+  order set; see *Render reality*. EBSR is auto-decomposed into two single-choice items at assemble time so it
+  renders.)
   Answer key from `qti-correct-response`. Passage HTML ⊆ `div/p/h1/h2/strong/em/br/blockquote` + MathML;
   images must be **S3 URLs** (no other media).
 - Every JSON item carries its **question stem** (`interaction.questionStructure.prompt`) — a stemless item is rejected.
@@ -67,17 +72,32 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   `published`, student-view with answer keys hidden. Confirmed for **both** the bridge-generated QTI
   (`examples/g3v2_demo_bridge.py`) **and the production `incept-qti-sdk` package** (6 items, real ELA sample),
   which our packager also parses clean. Real TimeBack QC, sandbox tenant — **not** the live Alpha Read renderer.
-- **Live push + render (verified 2026-06-17):** the production `incept-qti-sdk` package (6 items + 6 stimuli)
-  was pushed to **live Alpha Read** (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`) as a `STAN-PROBE-DELETEME`
-  draft — 6 items (verbatim XML POST) + test + a full OneRoster course/unit/lesson/resource/link, all 201. It
-  **renders in AlphaBuild**: all 6 formats appear (Choice/Match/Order/Composite-EBSR/HotText), the QTI panel
-  shows **✅ Valid**, and the **"Preview (from Timeback) LIVE"** renders the real two-pane reading view
-  (passage + question + selectable options).
-- **Student-app render confirmed (2026-06-17):** the real ELA article renders **end-to-end in the live Alpha
-  Read student app** — `https://alpharead.alpha-1edtech.ai/articles?articleId=<N>&crsid=article_<N>` shows the
-  passage → guiding-question unlock flow (a 25-step reading session whose step types match the live article).
-  A test student (own profile, `student` role) is enrolled via term→class→enrollment
-  (`push_to_timeback.py --enroll-student <userId>`). Only the student **login** is non-automatable.
+- **Live push (verified 2026-06-17):** the sample `incept-qti-sdk` package (6 items + 6 stimuli) was pushed to
+  **live Alpha Read** (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`) as a `STAN-PROBE-DELETEME` draft — items
+  (verbatim XML POST) + test + a full OneRoster course/unit/lesson/resource/component-resource, all 201/409
+  (= server accepted; 201 is acceptance, not render). A test student (own profile, `student` role) is enrolled
+  via term→class→enrollment (`push_to_timeback.py --enroll-student <userId>`); only the student **login** is
+  non-automatable. In AlphaBuild (the **authoring** tool, *not* the live reader) the QTI panel shows **Valid** and
+  the preview renders a two-pane view — but AlphaBuild-Valid ≠ renders-in-the-reading-app (see next).
+- **Render reality — single-select choice + order only (probed live 2026-06-17).** Each format was pushed as its
+  own probe article and walked to the quiz in the live student app (`alpharead…/articles?articleId=<N>&crsid=article_<N>`):
+
+  | Format | Renders in the reading app? |
+  |---|---|
+  | `choice` (single-select MCQ) | ✅ renders + answerable |
+  | `order` (drag) | ✅ renders |
+  | EBSR → two linked single-choice items | ✅ renders (the packager auto-decomposes) |
+  | `match` · `hot-text` · `text-entry` | ❌ render **blank** (no interaction body) |
+  | EBSR pushed **composite** | ❌ **flattens** to one ~8-option question |
+  | MSQ (`cardinality="multiple"`) | ⚠️ renders but **single-select** — can't be answered |
+
+  This is an Alpha Read **reading-renderer** capability, not a packaging defect (valid QTI, server-accepted). The
+  tech-enhanced formats are real content on the **assessment** surface (`alpha_read_build`, MAP-proxy) — a
+  *different* renderer. The live reading course is **1077/1077 single-select MCQ** (exhaustive census), so the
+  renderer's set covers 100% of real reading content. **Transform playbook for reading:** EBSR → 2 single-choice
+  (auto, `assemble()`); hot-text → single-choice (verified renders); match → one single-choice MCQ per row (not
+  MSQ); text-entry → single-choice MCQ (or test the JSON-push path). match/hot-text/text-entry reading-render is a
+  standing renderer-parity ask for the Alpha Read team (not urgent — live reading is all MCQ).
 - **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator.
   *Gotchas baked into the tool:* **one article = one passage + its questions** — group items by stimulus-ref;
   putting unrelated passages in one article renders as an incoherent jumble. The QTI test **and** the OneRoster
@@ -87,7 +107,7 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   org the viewer belongs to; a class's `terms` must share the class's `org`.
 
 ## Upload — two real targets
-- **Demo (proven):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's
+- **Demo (verified):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's
   `grade3-reading-v2` sample → QTI → package), then import it to the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
   `demo` tenant — `POST /dev/mint?tenantId=demo` for a token, then `POST …/imports/qti-package` with
   `Content-Type: application/xml`, an `Idempotency-Key` header, and the raw item XML as the body (the server

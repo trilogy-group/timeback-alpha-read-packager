@@ -289,10 +289,12 @@ def test_match_directedpair_pairs_survive_verbatim():
     assert "<qti-match-interaction" in item["xml"]
 
 
-def test_ebsr_two_response_declarations_and_envelope():
-    """ebsr: TWO response-declarations (Part A + Part B), each base-type identifier. Composite ->
-    XML-only. Both parts' keys must live in the verbatim envelope, NOT a JSON two-part model."""
-    parsed, item = _emit("sample-ebsr")
+def test_ebsr_parts_parse_with_per_part_prompts_and_keys():
+    """ebsr parsing: TWO parts (Part A claim + Part B evidence), each coupled to its own
+    response-declaration (RESPONSE_1 / RESPONSE_2) so the two answer keys never cross-contaminate.
+    Each part now ALSO carries its own per-part prompt — the <qti-prompt> inside that interaction —
+    which the decomposition needs so each emitted single-select item has a real stem."""
+    parsed = arpack.from_qti_xml(_raw("sample-ebsr"))
     assert parsed["format"] == "ebsr"
     parts = parsed["ebsr_parts"]
     assert len(parts) == 2
@@ -300,12 +302,52 @@ def test_ebsr_two_response_declarations_and_envelope():
     assert parts[1]["response_identifier"] == "RESPONSE_2"
     # both parts key to choice "B" in the fixture
     assert parts[0]["correct_indices"] == [1] and parts[1]["correct_indices"] == [1]
-    assert item["format"] == "xml"
-    rd_ids = [rd.attrib.get("identifier")
-              for rd in ET.fromstring(item["xml"]).iter()
-              if rd.tag.split('}', 1)[-1] == "qti-response-declaration"]
-    assert rd_ids == ["RESPONSE_1", "RESPONSE_2"], "EBSR's two response-decls must be preserved"
-    assert "interactions" not in item, "EBSR must NOT be JSON-modelled into a two-part interactions[]"
+    # per-part prompts captured from each interaction's own <qti-prompt>
+    assert "Part A" in parts[0]["prompt"] and "Part B" in parts[1]["prompt"]
+    assert parts[0]["prompt"] != parts[1]["prompt"]
+
+
+def test_ebsr_decomposes_into_two_choice_items_on_assemble():
+    """The SHIPPED EBSR contract (replaces the old composite-envelope behavior): Alpha Read's reading
+    renderer flattens a composite (two-interaction) item into one ~8-option question (confirmed live);
+    the fix (also confirmed live to render) decomposes the EBSR into TWO linked single-select CHOICE
+    items. After assemble(), an EBSR input yields items `sample-ebsr-partA` and `sample-ebsr-partB`,
+    both choice + single-select (maxChoices==1), each with a non-empty stem + a resolvable
+    correctResponse + a stimulusRef, appearing as two separate "Guiding …" sections — and NO
+    composite/envelope item remains in the assembled package."""
+    spec = arpack.adapt_qti_item(arpack.from_qti_xml(_raw("sample-ebsr")))
+    skel = {"course": {"title": "STAN-PROBE-DELETEME ebsr-decomp", "courseCode": "ALPHAREAD-PROBE",
+                       "grades": ["3"], "subjects": ["Reading"], "org_sourcedId": "powerpath-ui-org"},
+            "units": [{"title": "U", "sortOrder": 1, "lessons": [{
+                "vendorId": 9300001, "title": "L", "xp": 12,
+                "guiding": [
+                    {"stimulus": {"title": "P1", "html": "<div><p>Passage 1.</p></div>"}, "item": spec},
+                    {"stimulus": {"title": "P2", "html": "<div><p>Passage 2.</p></div>"},
+                     "item": {"title": "G2", "prompt": "Q2?", "choices": ["A", "B", "C", "D"], "correct_index": 0}},
+                    {"stimulus": {"title": "P3", "html": "<div><p>Passage 3.</p></div>"},
+                     "item": {"title": "G3", "prompt": "Q3?", "choices": ["A", "B", "C", "D"], "correct_index": 0}},
+                ],
+                "quiz": [{"title": f"Z{i}", "prompt": "Q?", "choices": ["A", "B", "C", "D"],
+                          "correct_index": 0} for i in range(4)]}]}]}
+    pkg = arpack.assemble(skel)
+    assert arpack.validate(pkg) == []
+    items = {i["identifier"]: i for i in pkg["qti"]["items"]}
+    assert "sample-ebsr-partA" in items and "sample-ebsr-partB" in items
+    assert "sample-ebsr" not in items, "the composite EBSR item must not survive"
+    assert not any(i.get("format") == "xml" for i in pkg["qti"]["items"]), \
+        "no composite/raw-XML envelope item may remain after decomposition"
+    for pid in ("sample-ebsr-partA", "sample-ebsr-partB"):
+        it = items[pid]
+        assert it["type"] == "choice"
+        assert it["interaction"]["maxChoices"] == 1
+        assert it["interaction"]["questionStructure"]["prompt"].strip()
+        assert it["responseDeclarations"][0]["correctResponse"]["value"]
+        assert "stimulusRef" in it
+    secs = pkg["qti"]["tests"][0]["qti-test-part"][0]["qti-assessment-section"]
+    part_secs = [s for s in secs if s["title"].startswith("Guiding")
+                 and s["qti-assessment-item-ref"][0]["identifier"].startswith("sample-ebsr-part")]
+    assert len(part_secs) == 2, "the two EBSR parts appear as two separate Guiding sections"
+    json.dumps(pkg)   # stays JSON-serializable for emit()
 
 
 # ════════════════════════════ the S3 image gate ════════════════════════════

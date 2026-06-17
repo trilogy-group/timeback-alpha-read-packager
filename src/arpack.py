@@ -250,20 +250,27 @@ def _correct_for(root, response_identifier):
 
 
 def _read_ebsr_parts(root):
-    """Parse a 2-part EBSR item into [{choices, choice_ids, correct_indices, response_identifier}, …].
-    Each qti-choice-interaction is one part (Part A claim, Part B evidence); its response-identifier
-    couples it to its own correct-response so the two answer keys never cross-contaminate."""
+    """Parse a 2-part EBSR item into [{choices, choice_ids, correct_indices, response_identifier,
+    prompt}, …]. Each qti-choice-interaction is one part (Part A claim, Part B evidence); its
+    response-identifier couples it to its own correct-response so the two answer keys never
+    cross-contaminate. The PER-PART prompt is the <qti-prompt> INSIDE each interaction (e.g.
+    "Part A. …" / "Part B. …"); without it the decomposed single-select items would render
+    stemless. Falls back to the item-level prompt, then "", when a per-part prompt is absent."""
+    item_prompt = _read_prompt(root)
     parts = []
     for inter in [el for el in root.iter() if _localname(el.tag) == "qti-choice-interaction"]:
         rid = inter.attrib.get("response-identifier") or inter.attrib.get("responseIdentifier")
         opts = _opts_under(inter)
         ids = [o["id"] for o in opts]
         corr = _correct_for(root, rid)
+        prompt_el = inter.find("qti-prompt")
+        prompt = "".join(prompt_el.itertext()).strip() if prompt_el is not None else ""
         parts.append({
             "choices": [o["text"] for o in opts],
             "choice_ids": ids,
             "correct_indices": [ids.index(c) for c in corr if c in ids],
             "response_identifier": rid,
+            "prompt": prompt or item_prompt or "",
         })
     return parts
 
@@ -409,6 +416,7 @@ def adapt_qti_item(parsed):
     ids = [c["id"] for c in parsed["choices"]]
     out = {"identifier": parsed.get("identifier"), "stimulus_id": parsed.get("stimulus_id"),
            "title": parsed["title"], "prompt": parsed["prompt"], "format": fmt,
+           "role": parsed.get("role"),
            "max_choices": parsed.get("max_choices"),
            "text_blanks": parsed.get("text_blanks"),
            "answers": parsed.get("answers"),
@@ -418,6 +426,11 @@ def adapt_qti_item(parsed):
            "correct_ids": parsed.get("correct_ids") or [],
            "metadata": parsed.get("metadata") or {},
            "rawXml": parsed.get("rawXml")}
+    if fmt == "ebsr":
+        # carry the per-part structure through so assemble() can DECOMPOSE the composite EBSR into
+        # two linked single-select choice items (Alpha Read's renderer flattens a composite item
+        # into one ~8-option question — confirmed live). _ebsr_to_choice_specs reads spec["ebsr_parts"].
+        out["ebsr_parts"] = parsed.get("ebsr_parts") or []
     if _is_xml_only(parsed):
         # XML-only (incl. multi-blank text-entry): rawXml is the source of truth (answer key +
         # interaction(s) live inside it). Require non-empty rawXml; do not re-model the key.
@@ -549,25 +562,39 @@ def assemble(skel):
             # (https://qti.alpha-1edtech.ai/api/assessment-items/<id>); vendor item/stimulus/choice
             # ids are REUSED when carried so the refs resolve on Mayank's service, minted otherwise.
             sections = []
+            seq = 0                                       # running, unique section sequence
             for gi, g in enumerate(lesson.get("guiding", []), 1):
                 it = g["item"]
                 sid = it.get("stimulus_id") or g["stimulus"].get("identifier") or f"guiding_{lesson['vendorId']}_{gi}"
                 qti["stimuli"].append({"identifier": sid, "title": g["stimulus"]["title"],
                                        "content": _sani(g["stimulus"]["html"])})
                 iid = it.get("identifier") or f"{sid}_item"
-                qti["items"].append(_item(iid, it, stimulus_id=sid))
-                sections.append({"identifier": f"test_{sid}", "title": f"Guiding {gi}",
-                                 "visible": True, "required": True, "fixed": False, "sequence": gi,
-                                 "qti-assessment-item-ref": [{"identifier": iid,
-                                                              "href": f"{iid}.xml"}]})
+                # A composite EBSR DECOMPOSES into 2 single-select choice items (<iid>-partA/-partB);
+                # every other format stays 1:1. Each emitted item gets its OWN guiding section so the
+                # validator's "exactly 1 item-ref per Guiding section" gate stays satisfied.
+                emitted = _emit_items(iid, it, sid)
+                one = len(emitted) == 1
+                for k, (rid, item) in enumerate(emitted):
+                    qti["items"].append(item)
+                    seq += 1
+                    sec_id = f"test_{sid}" if one else f"test_{sid}_p{chr(65 + k)}"
+                    sec_title = f"Guiding {gi}" if one else f"Guiding {gi}{chr(65 + k)}"
+                    sections.append({"identifier": sec_id, "title": sec_title,
+                                     "visible": True, "required": True, "fixed": False, "sequence": seq,
+                                     "qti-assessment-item-ref": [{"identifier": rid,
+                                                                  "href": f"{rid}.xml"}]})
             quiz_refs = []
             for qi, q in enumerate(lesson.get("quiz", []), 1):
                 iid = q.get("identifier") or f"quiz_{lesson['vendorId']}_{qi}"
-                qti["items"].append(_item(iid, q, stimulus_id=None))
-                quiz_refs.append({"identifier": iid, "href": f"{iid}.xml"})
+                # EBSR in a quiz decomposes into 2 refs too (it normally rides as a guiding item, but
+                # if it lands here the extra ref deliberately trips the =QUIZ_ITEMS gate — fail-closed).
+                for rid, item in _emit_items(iid, q, None):
+                    qti["items"].append(item)
+                    quiz_refs.append({"identifier": rid, "href": f"{rid}.xml"})
+            seq += 1
             sections.append({"identifier": "test_quiz", "title": "Quiz",
                              "visible": True, "required": True, "fixed": False,
-                             "sequence": len(lesson.get("guiding", [])) + 1,
+                             "sequence": seq,
                              "qti-assessment-item-ref": quiz_refs})
             # test metadata: verified live shape {grade, measuredReadingGrade, lexileLevel}.
             # Per-lesson values ride in from the skeleton shell when present (Anirudh's band/lexile
@@ -597,6 +624,51 @@ def assemble(skel):
                                    "metadata": {"lessonType": "alpha-read-article"}})
     return {"course": course, "components": components, "resources": resources,
             "componentResources": comp_resources, "qti": qti}
+
+def _ebsr_to_choice_specs(spec):
+    """DECOMPOSE a composite EBSR spec into [partA_spec, partB_spec, …] — one standalone, JSON-safe,
+    single-select 'choice' spec per qti-choice-interaction. Alpha Read's reading renderer FLATTENS a
+    composite item (an EBSR = one assessment-item with TWO qti-choice-interactions) into one ~8-option
+    question (confirmed live). The fix (also confirmed live to render) is to emit TWO linked single-
+    select CHOICE items — Part A (claim) + Part B (evidence) — each its own qti-choice-interaction.
+
+    Each part spec carries its own per-part prompt (the <qti-prompt> inside that interaction), its own
+    choices/ids/answer-key (so the two keys never cross-contaminate), max_choices=1 (single-select →
+    interaction.maxChoices==1), and the parent's stimulus_id (so each decomposed part is a guiding item
+    with a stimulusRef). ≥2 parts are labelled A, B, C, … (normally exactly 2)."""
+    parts = spec.get("ebsr_parts") or []
+    base_title = spec.get("title") or spec.get("identifier") or "EBSR"
+    specs = []
+    for k, part in enumerate(parts):
+        specs.append({
+            "title": f"{base_title} — Part {chr(65 + k)}",
+            "role": spec.get("role", "guiding"),
+            "format": "choice",
+            "max_choices": 1,
+            "prompt": part.get("prompt", ""),
+            "choices": part.get("choices", []),
+            "choice_ids": part.get("choice_ids", []),
+            "correct_indices": part.get("correct_indices", []),
+            "metadata": spec.get("metadata"),
+            "stimulus_id": spec.get("stimulus_id"),
+        })
+    return specs
+
+
+def _emit_items(iid, spec, stimulus_id):
+    """Build the assessment-item(s) one input item yields — a list of (ref_id, item_dict).
+
+    For a composite EBSR (format=='ebsr') this DECOMPOSES into one single-select choice item per part,
+    each id-linked to the source as `<iid>-partA` / `<iid>-partB` (the renderer flattens the composite
+    otherwise — see _ebsr_to_choice_specs). Every other format is a 1:1 passthrough to _item()."""
+    if spec.get("format") == "ebsr":
+        emitted = []
+        for k, part_spec in enumerate(_ebsr_to_choice_specs(spec)):
+            rid = f"{iid}-part{chr(65 + k)}"
+            emitted.append((rid, _item(rid, part_spec, stimulus_id)))
+        return emitted
+    return [(iid, _item(iid, spec, stimulus_id))]
+
 
 def _xml_envelope_item(iid, spec, stimulus_id):
     """Build the RAW-XML envelope for a NON-JSON-safe interaction (Ilma RULE 1).

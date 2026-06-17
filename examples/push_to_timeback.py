@@ -23,6 +23,76 @@ SAFETY (by design):
 Creds come from env only — never echoed, never written to the repo.
 """
 import argparse, base64, glob, json, os, re, sys, time, urllib.parse, urllib.request, urllib.error
+from xml.sax.saxutils import escape as _xml_escape
+
+# Reuse the packager's QTI parser so the EBSR split sees the SAME parsed parts (choices/keys/prompts)
+# the assembler does — single source of truth for the decomposition.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
+try:
+    import arpack
+except Exception:                                          # arpack absent → EBSR split degrades to
+    arpack = None                                          # posting the composite verbatim (old behavior)
+
+
+def _ebsr_split(raw):
+    """If `raw` is a COMPOSITE EBSR item (one assessment-item with TWO qti-choice-interactions),
+    return [(partA_id, partA_xml), (partB_id, partB_xml), …] — one standalone single-interaction
+    QTI 3.0 choice item per part, id-linked as <iid>-partA / <iid>-partB. Otherwise return None.
+
+    Alpha Read's reading renderer flattens a composite (two-interaction) item into one ~8-option
+    question (confirmed live); two linked single-select choice items render correctly. Each emitted
+    item carries: one qti-response-declaration (single/identifier) with the part's correct id, one
+    qti-choice-interaction with the part's own <qti-prompt> + simple-choices, a SCORE outcome decl,
+    a match_correct-style response-processing, and the SAME qti-assessment-stimulus-ref as the source."""
+    if arpack is None:
+        return None
+    try:
+        parsed = arpack.from_qti_xml(raw)
+    except Exception:
+        return None
+    if parsed.get("format") != "ebsr":
+        return None
+    parts = parsed.get("ebsr_parts") or []
+    if len(parts) < 2:
+        return None
+    src_iid = parsed.get("identifier") or "ebsr"
+    src_title = parsed.get("title") or src_iid
+    sref = re.search(r'<qti-assessment-stimulus-ref[^>]*/?>', raw)        # copy verbatim if present
+    sref_xml = ("\n  " + sref.group(0)) if sref else ""
+    out = []
+    for k, part in enumerate(parts):
+        pid = f"{src_iid}-part{chr(65 + k)}"
+        ptitle = f"{src_title} — Part {chr(65 + k)}"
+        ids = part.get("choice_ids") or [f"{pid}_c{n}" for n in range(len(part.get("choices", [])))]
+        corr = [ids[i] for i in part.get("correct_indices", []) if 0 <= i < len(ids)]
+        corr_xml = "".join(f"<qti-value>{_xml_escape(c)}</qti-value>" for c in corr)
+        choices_xml = "".join(
+            f'\n      <qti-simple-choice identifier="{_xml_escape(ids[n])}"><p>{_xml_escape(txt)}</p>'
+            f'</qti-simple-choice>'
+            for n, txt in enumerate(part.get("choices", [])))
+        prompt = part.get("prompt") or ""
+        prompt_xml = f"<qti-prompt><p>{_xml_escape(prompt)}</p></qti-prompt>" if prompt else ""
+        xml = (
+            "<?xml version='1.0' encoding='UTF-8'?>\n"
+            '<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" '
+            f'identifier="{_xml_escape(pid)}" title="{_xml_escape(ptitle)}" '
+            'adaptive="false" time-dependent="false">\n'
+            '  <qti-response-declaration identifier="RESPONSE" cardinality="single" '
+            f'base-type="identifier"><qti-correct-response>{corr_xml}</qti-correct-response>'
+            '</qti-response-declaration>\n'
+            '  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float"/>'
+            f"{sref_xml}\n"
+            '  <qti-item-body>\n'
+            '    <qti-choice-interaction response-identifier="RESPONSE" max-choices="1">'
+            f"{prompt_xml}{choices_xml}\n"
+            '    </qti-choice-interaction>\n'
+            '  </qti-item-body>\n'
+            '  <qti-response-processing '
+            'template="https://www.imsglobal.org/question/qti_v3p0/rptemplates/match_correct"/>\n'
+            '</qti-assessment-item>\n'
+        )
+        out.append((pid, ptitle, xml))
+    return out
 
 TOKEN_URL = os.environ.get("TIMEBACK_TOKEN_URL",
     "https://prod-beyond-timeback-api-2-idp.auth.us-east-1.amazoncognito.com/oauth2/token")
@@ -134,9 +204,23 @@ def main():
         iid = re.search(r'identifier="([^"]+)"', raw).group(1)
         ititle = (re.search(r'title="([^"]+)"', raw) or [None, iid])[1]
         sref = re.search(r'qti-assessment-stimulus-ref[^>]*identifier="([^"]+)"', raw)
-        groups.setdefault(sref.group(1) if sref else iid, []).append((iid, ititle))
-        item_ids.append(iid)
-        post(QTI + "/assessment-items", {"format": "xml", "xml": raw}, "item:" + iid, tok, state, a.checkpoint)
+        key = sref.group(1) if sref else iid
+        # COMPOSITE EBSR (one item, two qti-choice-interactions) renders as one ~8-option blob in
+        # Alpha Read (confirmed live). Split it into two single-interaction choice items (-partA/-partB)
+        # and POST + reference BOTH, so each renders as its own single-select question. Every other
+        # item type is POSTed verbatim, unchanged.
+        ebsr = _ebsr_split(raw)
+        if ebsr:
+            for pid, ptitle, pxml in ebsr:
+                groups.setdefault(key, []).append((pid, ptitle))
+                item_ids.append(pid)
+                post(QTI + "/assessment-items", {"format": "xml", "xml": pxml},
+                     "item:" + pid, tok, state, a.checkpoint)
+        else:
+            groups.setdefault(key, []).append((iid, ititle))
+            item_ids.append(iid)
+            post(QTI + "/assessment-items", {"format": "xml", "xml": raw},
+                 "item:" + iid, tok, state, a.checkpoint)
     if not item_ids:
         sys.exit("No items/*.xml found in package.")
     print("  -> %d item(s) in %d passage-group(s) = %d article(s)" % (len(item_ids), len(groups), len(groups)))

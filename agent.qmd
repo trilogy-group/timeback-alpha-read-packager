@@ -13,7 +13,7 @@ Ilma's `incept-timeback-plugin` skill (where we differed, she won — correction
 ## The model (verified, do not deviate)
 `Course (alpha_read markers + publish flags) → flat units → resource per lesson (lessonType:"alpha-read-article") → QTI assessment-test → items + stimulus`.
 - Per lesson: **3–6 guiding** items (1 passage + 1 item each, carries a stimulus-ref) **+ exactly 4 quiz** items (no stimulus). The items we've sampled are 4-option MCQs; the packager accepts any of the 7 formats (it does not require MCQ-ness or a fixed option count beyond a floor of ≥2).
-- Items: **all 7 r2 formats** handled end-to-end via Ilma's RULE 1 split — JSON-safe (`choice`/`order`/single-blank `text-entry`) emit JSON; the rest (`hot-text`/`match`/`ebsr` + multi-blank `text-entry`) ride as raw `<qti-assessment-item>` XML verbatim. (`extended-text` is also routed JSON-safe but unused — no fixture emits it.) Answer key from `qti-correct-response`.
+- Items: **all 7 r2 formats** handled through the packager (parse → validate → emit) via Ilma's RULE 1 split — JSON-safe (`choice`/`order`/single-blank `text-entry`) emit JSON; the rest (`hot-text`/`match`/`ebsr` + multi-blank `text-entry`) ride as raw `<qti-assessment-item>` XML verbatim. (`extended-text` is also routed JSON-safe but unused — no fixture emits it.) Answer key from `qti-correct-response`. **This is the packaging contract — the Alpha Read *reading* renderer displays only single-select choice + order (see Render); EBSR is auto-decomposed to two choice items at assemble.**
 - **JSON-safe** items carry the **question stem** in `interaction.questionStructure.prompt` (Ilma's JSON template, create-mcq.md); options nest in `questionStructure.choices`; a stemless JSON item fail-closes. XML-only items carry their stem inside the verbatim XML and are not stem-checked.
 - **App ownership (Ramish breaking change, ≥2026-06-30):** root `course.primaryApp` is the ONLY ownership setter and must be exactly `"alpha_read"`; `metadata.primaryApp` is now **inert** (mirrored for pre-cutover servers, forward-safe to drop).
 - Passage HTML ⊆ `div/p/h1/h2/strong/em/br/blockquote` + MathML; **images must be S3 URLs** (no other media). Standards do **not** serialise (live course tags none).
@@ -36,19 +36,31 @@ authored `metadata.metrics` · id-coupling breaks · wrong section structure · 
 - **MCQ/MSQ (`choice`):** [pack] key ⊆ options; exactly 1 key (MCQ) / ≥1 (MSQ); ≥2 options (the validator floor; live items use 4).
 - **Drag-to-order (`order`):** [pack] cardinality `ordered`; key ranks every option.
 - **Fill-in (`text-entry`):** [pack] ≥1 non-empty accepted answer; single-blank → JSON, multi-blank → XML with **per-blank** keys (blank N never accepts blank M's answer).
-- **Hot-text / match / EBSR (XML-only):** [pack] checks **only** that the envelope is well-formed QTI, has a matching identifier, and is S3-clean — it does **not** inspect the answer key or options (RULE 1). Content correctness is therefore [gen]: hot-text's correct token IS the evidence span; match pairs are complete + unambiguous; **EBSR Part B options are verbatim from the passage and depend on Part A**. [probe] all three: does AlphaRead render them?
+- **Hot-text / match / EBSR (XML-only):** [pack] checks **only** that the envelope is well-formed QTI, has a matching identifier, and is S3-clean — it does **not** inspect the answer key or options (RULE 1). Content correctness is therefore [gen]: hot-text's correct token IS the evidence span; match pairs are complete + unambiguous; **EBSR Part B options are verbatim from the passage and depend on Part A**. PROBED 2026-06-17: none of the three render on the reading surface (hot-text + match → blank quiz body; composite EBSR → flattens to one ~8-option question). Fix = transform to single-select choice (EBSR auto-decomposed at assemble; hot-text → single-choice verified; match → per-row single-choice). See Render.
 - **`write_prompt` (Day-2 Read & Write):** 1 MCQ (name the text structure) + 1 hot-text (click the proof) — no typing. Both rows above apply; the hot-text [probe] is the load-bearing unknown.
 - **Course:** [pack] root `primaryApp:"alpha_read"`; publish flags; 3–6 guiding + exactly 4 quiz per lesson; resource↔test id-coupling; no duplicate ids; `lessonType:"alpha-read-article"`.
 
 The headline: the packager guarantees items are **well-formed and shippable**; for hot-text/match/EBSR it does **not** vouch for content correctness — that's on generation, and IB doesn't check it.
 
-## Render (live behavior — what AlphaRead shows)
-Vertical article→question→unlock. Per lesson: passage + MCQs. The QTI API accepts the tech-enhanced formats,
-but **whether AlphaRead renders them is unverified** — the open
-**renderer probe** (needs a test-student account, not real children). Keep MCQ/MSQ as the safe default.
-The reading-course export we sampled is all MCQ, but a MAP-equivalent assessment build in
-`trilogy-group/alpha_courses/grade-3-reading/alpha_read_build` already authors hot-text / match / ebsr /
-order (sampled, not exhaustively checked) — so the all-7 path and the renderer probe gate real content, not just fixtures.
+## Render (live behavior — what AlphaRead shows) — PROBED 2026-06-17
+The renderer probe is **done** (each format pushed as a probe article, walked to the quiz on a test student).
+**Two surfaces, two renderers — do not conflate:**
+- **Reading-article surface** (`alpharead…/articles`): renders **only single-select `qti-choice-interaction`
+  and `qti-order-interaction`**. `match`, `hot-text`, `text-entry` render a **blank** quiz body; a composite
+  **EBSR flattens** both parts into one ~8-option question; `choice` renders **single-select even when
+  `cardinality="multiple"`** (an MSQ shows but can't be answered). All push clean (HTTP 201, valid QTI, GET 200) —
+  it is a renderer capability gap, not a packaging defect.
+- **Assessment surface** (`alpha_read_build`, MAP-proxy): a *different*, working renderer that genuinely hosts the
+  full type-set (exhaustive census: 272 mcq, 103 hot_text, 100 EBSR, 58 msq, 42 sequence, 37 match). The
+  tech-enhanced formats are real content — just on this surface, not the reading app.
+- **The live reading course is 1077/1077 single-select MCQ** (exhaustive census of `live_course_export`), so the
+  reading renderer's set covers 100% of real reading content. Keep single-select MCQ (+ order) as the default.
+- **Transform playbook for the reading surface** (each verified or render-safe): **EBSR → two linked
+  single-select choice items — now done automatically at assemble time** (`_emit_items`/`_ebsr_to_choice_specs`);
+  never push a composite EBSR (it flattens). hot-text → single-choice (verified renders). match → one
+  single-choice MCQ **per row** (NOT one MSQ — the renderer is single-select). text-entry → single-choice MCQ
+  (or test the JSON-modeled push path, untested). Escalate match/hot-text/text-entry reading-render to the Alpha
+  Read team as renderer parity — not urgent (live reading is all MCQ).
 
 ## Cross-check vs Ilma's skill — corrections APPLIED
 - **D3** component-resource links carry `status:"active"` + `metadata.lessonType` (else 422).
@@ -60,9 +72,9 @@ order (sampled, not exhaustively checked) — so the all-7 path and the renderer
 - **D1/D2 (Ilma RULE 1 — IMPLEMENTED):** JSON-safe is exactly `choice` / `extended-text` / `order` / single-blank `text-entry` → emitted as JSON. `hottext` / `match` / `associate` / `inline-choice` / `gap-match` / `ebsr` / `select-point` **and multi-blank `text-entry`** → emitted as the raw-XML envelope `{"format":"xml","xml":<rawXml>}`, carried byte-verbatim (the JSON→XML converter corrupts their scoring otherwise). The invented `map_response` template is gone (Ilma uses `match_correct`). The split is decided **per item** (`_is_xml_only`); `validate()` checks XML-only items as a well-formed envelope, not as a JSON option model.
 
 ## Upload — two real targets
-`arpack` is a clean offline emitter; the upload is a separate step. Two proven/known surfaces:
+`arpack` is a clean offline emitter; the upload is a separate step. Two verified/known surfaces:
 
-**Demo (proven, no real creds):** the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
+**Demo (verified, no real creds):** the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
 `demo` tenant. `POST /dev/mint?tenantId=demo` → token; `POST /tenants/demo/alpha/content/imports/qti-package`
 with `Content-Type: application/xml` + an `Idempotency-Key` header + the raw item XML body (the surface parses
 it — its rule: do NOT parse QTI locally). Read back `…/items/{id}/trust` (expect `trust_status:"trusted"`) and
@@ -97,12 +109,14 @@ student-app URL is `https://alpharead.alpha-1edtech.ai/articles?articleId=<N>&cr
 **One article = one passage + its questions** — `push_to_timeback.py` groups items by stimulus-ref into one
 article per passage; lumping unrelated passages into a single article renders as an incoherent jumble (the
 sample is a 7-item *format showcase*, not one article — each item has its own passage).
-**Verified 2026-06-17:** clicking the course in the dashboard renders the real ELA article end-to-end
-(passage → guiding-question unlock flow, 25-step reading session, step types matching the live article).
+**Verified 2026-06-17:** clicking the course in the dashboard renders a sample passage's reading session
+(passage → guiding-question unlock flow); the **choice/order** question steps render correctly. The content is a
+sample showcase, not a real coherent article, and only choice/order render in-app — match/hot-text/text-entry are
+blank and composite EBSR flattens (see Render).
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
 - **Server-validated (demo tenant):** the QTI for all 6 sample formats (incl. raw-XML hot-text/match/ebsr) imports QC-trusted to the platform3 content-alpha `demo` tenant via `qti-package` — `trust_status:"trusted"`, `published`, student-view with answer keys hidden. Confirmed for both the bridge-generated QTI AND the production `incept-qti-sdk` package (6 items, real ELA sample), which our packager also parses clean. Real TimeBack QC, sandbox tenant — not the live Alpha Read renderer (that's the cred-gated live push).
-- **Live push + render (verified 2026-06-17):** the production package (6 items + 6 stimuli) pushed to live Alpha Read as a `STAN-PROBE-DELETEME` draft (all 201) and **renders in AlphaBuild** — all 6 formats present, QTI panel **Valid**, live preview shows the passage + question.
-- **Student render wired (2026-06-17):** a test student (own profile, `student` role) enrolled via term→class→enrollment; the course surfaces in the student's class list, and AlphaBuild's "Preview (from Timeback) **LIVE**" renders the real two-pane reading view (passage + question + selectable options). The only non-automatable step is the student **login** (agents must not create accounts or authenticate as students).
+- **Live push (verified 2026-06-17):** the sample package (6 items + 6 stimuli) pushed to live Alpha Read as a `STAN-PROBE-DELETEME` draft (all 201/409 = server-accepted, not a render claim). In **AlphaBuild** (the authoring tool, *not* the reading renderer) all 6 formats show, QTI panel **Valid**, preview shows a two-pane view. AlphaBuild-Valid ≠ renders-in-the-reading-app.
+- **Student render PROBED (2026-06-17):** a test student (own profile) enrolled via term→class→enrollment; each format walked to the quiz in the live reading app. Result: **single-select choice + order render; match/hot-text/text-entry render blank; composite EBSR flattens; MSQ renders but is single-select** (see Render). hot-text→single-choice and EBSR→two-choice transforms were pushed and **confirmed to render**. Only the student **login** is non-automatable (agents must not create accounts or authenticate as students).
 - **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator.

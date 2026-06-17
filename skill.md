@@ -6,8 +6,12 @@ description: Package QTI items + a course skeleton into a complete TimeBack Alph
 # TimeBack Alpha Read Packager — skill
 
 Turn QTI items (`incept-qti-sdk` output) + a course skeleton (an expedition table) into a
-complete Alpha Read course (OneRoster v1p2 + QTI 3.0) that passes the offline, fail-closed `validate()` — and
-renders end-to-end in the live Alpha Read student app (verified 2026-06-17 with the real ELA sample).
+complete Alpha Read course (OneRoster v1p2 + QTI 3.0) that passes the offline, fail-closed `validate()`.
+The Alpha Read **reading** renderer displays **single-select `choice` + `order` only**; a sample passage with
+its choice/order questions renders end-to-end in the live student app (verified 2026-06-17). Other interaction
+types validate and push cleanly but render blank or flattened on the reading surface — decompose/transform
+them to single-select choice (see "Render reality" below). The packager handles all 7 r2 formats end-to-end
+*through the offline validator*; "renders in Alpha Read reading" is a narrower claim than "valid QTI".
 
 ## Invoke when
 - assembling or validating a Grade-3 reading course for AlphaRead
@@ -37,7 +41,7 @@ Read **`agent.qmd`** (contract, invariants, the applied cross-check corrections,
   answer key. **XML-only** items (hot-text/match/EBSR/…) are validated as a well-formed envelope — their key
   and stem live in the verbatim XML and are not inspected. (Also gated: duplicate-id, resource↔test
   id-coupling, no authored `metadata.metrics`.)
-- **UPLOAD — two targets.** *Demo (proven, no real creds):* import the QTI to the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
+- **UPLOAD — two targets.** *Demo (verified, no real creds):* import the QTI to the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
   `demo` tenant — `POST /dev/mint?tenantId=demo`, then `POST …/imports/qti-package` (`Content-Type: application/xml`
   + `Idempotency-Key` + raw item XML); read back `…/trust` (expect `trusted`) + `…/student-view`. Real TimeBack QC,
   sandbox tenant — not the live Alpha Read app. *Live (production, verified e2e):* `examples/push_to_timeback.py`
@@ -45,3 +49,16 @@ Read **`agent.qmd`** (contract, invariants, the applied cross-check corrections,
   Ilma's [/timeback](https://github.com/ilmych/incept-timeback-plugin) push order (her skill stays canonical).
   **Render gotcha:** the QTI test + OneRoster resource + component-resource must all share the id `article_<N>`
   (`vendorResourceId=<N>`) or the student app 404s. Draft (`STAN-PROBE-DELETEME…`) only; creds via gitignored `.env`.
+- **RENDER REALITY — two surfaces, two renderers (verified live 2026-06-17).** The Alpha Read **reading-article**
+  renderer displays **only single-select `qti-choice-interaction` and `qti-order-interaction`**. Verified by
+  pushing each format as a probe article and walking it to the quiz: `choice`/`order` render; `match`, `hot-text`,
+  and `text-entry` render a **blank** quiz body; a composite **EBSR flattens** both parts into one ~8-option
+  question. It also renders `choice` as **single-select even when `cardinality="multiple"`** (an MSQ shows but
+  can't be answered) — corroborated by the live reading course being 1077/1077 single-select MCQ. The
+  tech-enhanced formats (`match`/`hot-text`/EBSR/`sequence`) are real content but live on the **assessment**
+  surface (`alpha_read_build`, MAP-proxy), a *different* renderer. So for reading, target single-select choice +
+  order. **Transform playbook** (each verified or render-safe): EBSR → two linked single-select choice items
+  (now done automatically by `assemble()` / `_emit_items`); hot-text → single-choice (verified renders);
+  match → one single-choice MCQ **per row** (not MSQ); text-entry → single-choice MCQ (or test the JSON-push
+  path). Escalate match/hot-text/text-entry reading-render to the Alpha Read team as renderer parity — not
+  urgent (the live reading course is 100% MCQ).

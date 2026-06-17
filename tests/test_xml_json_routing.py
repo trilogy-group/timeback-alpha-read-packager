@@ -63,11 +63,15 @@ def test_json_safe_emit_json_dict(fn, fmt, card):
 
 
 # ───────────────────────── NON-JSON-safe types emit the raw-XML envelope ────────────────────────
+# NB: EBSR is omitted here on purpose. At the raw _item() type level it is still XML-only
+# (_is_xml_only('ebsr') is True, so _item() of a raw EBSR spec still produces the verbatim envelope —
+# see test_ebsr_item_level_still_xml_only below), but its SHIPPED behavior is DECOMPOSITION into two
+# single-select choice items (Alpha Read flattens a composite item live). That contract is asserted in
+# test_ebsr_decomposes_into_two_single_select_choice_items.
 @pytest.mark.parametrize("fn,fmt", [
     ("sample-hot-text-single.xml", "hottext"),
     ("sample-hot-text-multi-feedback.xml", "hottext"),
     ("sample-match-drag-drop.xml", "match"),
-    ("sample-ebsr.xml", "ebsr"),
 ])
 def test_xml_only_emit_envelope_verbatim(fn, fmt):
     raw = open(os.path.join(FX, fn)).read()
@@ -90,10 +94,39 @@ def test_match_directed_pair_survives_in_envelope():
     assert "<qti-value>france paris</qti-value>" in it["xml"]
 
 
-def test_ebsr_two_response_decls_survive_in_envelope():
+def test_ebsr_item_level_still_xml_only():
+    """The raw type-level fact is unchanged: 'ebsr' is in XML_ONLY_TYPES and a raw EBSR spec routed
+    straight through _item() still produces the verbatim {"format":"xml"} envelope (both response-decls
+    preserved). _xml_envelope_item still exists for the other XML-only families. What changed is the
+    ASSEMBLED-package behavior (decomposition) — see the next test."""
+    assert "ebsr" in arpack.XML_ONLY_TYPES
     it = arpack._item("sample-ebsr", _adapt("sample-ebsr.xml"), stimulus_id=None)
+    assert it["format"] == "xml"
     assert 'identifier="RESPONSE_1"' in it["xml"]
     assert 'identifier="RESPONSE_2"' in it["xml"]
+
+
+def test_ebsr_decomposes_into_two_single_select_choice_items():
+    """The SHIPPED EBSR contract: _emit_items() decomposes a composite EBSR into TWO linked
+    single-select choice items (<iid>-partA claim + <iid>-partB evidence). Alpha Read's reading
+    renderer flattens a composite (two-interaction) item into one ~8-option question; two standalone
+    single-select choice items render correctly (both confirmed live). Each part is its own
+    qti-choice-interaction with maxChoices==1, its own per-part prompt, its own resolvable answer key,
+    and the stimulus-ref — NO composite XML envelope is emitted."""
+    spec = _adapt("sample-ebsr.xml")
+    emitted = arpack._emit_items("sample-ebsr", spec, stimulus_id="stim_308fa4b211dd")
+    assert [rid for rid, _ in emitted] == ["sample-ebsr-partA", "sample-ebsr-partB"]
+    for rid, item in emitted:
+        assert item["type"] == "choice" and item.get("format") != "xml"
+        assert item["interaction"]["maxChoices"] == 1
+        rd = item["responseDeclarations"][0]
+        assert rd["cardinality"] == "single" and rd["correctResponse"]["value"]
+        assert item["interaction"]["questionStructure"]["prompt"].strip()
+        assert "stimulusRef" in item
+        assert arpack._validate_item(item) == []
+    # both parts key to choice "B" in the fixture, kept SEPARATE (no cross-contamination)
+    assert emitted[0][1]["responseDeclarations"][0]["correctResponse"]["value"] == ["B"]
+    assert emitted[1][1]["responseDeclarations"][0]["correctResponse"]["value"] == ["B"]
 
 
 # ───────────────────────── map_response template is DROPPED everywhere ───────────────────────────
