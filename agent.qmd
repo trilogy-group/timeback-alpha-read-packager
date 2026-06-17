@@ -59,13 +59,24 @@ order (sampled, not exhaustively checked) — so the all-7 path and the renderer
 - **D4** item-ref `href` = bare `{id}.xml`; **D5** MCQ choice floor relaxed to ≥2; resource `url` → https.
 - **D1/D2 (Ilma RULE 1 — IMPLEMENTED):** JSON-safe is exactly `choice` / `extended-text` / `order` / single-blank `text-entry` → emitted as JSON. `hottext` / `match` / `associate` / `inline-choice` / `gap-match` / `ebsr` / `select-point` **and multi-blank `text-entry`** → emitted as the raw-XML envelope `{"format":"xml","xml":<rawXml>}`, carried byte-verbatim (the JSON→XML converter corrupts their scoring otherwise). The invented `map_response` template is gone (Ilma uses `match_correct`). The split is decided **per item** (`_is_xml_only`); `validate()` checks XML-only items as a well-formed envelope, not as a JSON option model.
 
-## Push — via Ilma's `/timeback` skill, NOT hand-rolled
-`arpack` is a clean offline emitter. The upload runs through Ilma's `/timeback` skill (her tests run against the live API): she
-owns auth (Cognito body creds + token cache + 401 refresh), the push order (S3→course→units→lessons→items→
-tests→stimuli→resources(trailing `/`)→links, 409=success, checkpoint each), JSON-vs-XML branching, and
-GET-modify-PUT. Pre-flight: write-scoped Cognito client + `POST /validate`. Push only to a
+## Upload — two real targets
+`arpack` is a clean offline emitter; the upload is a separate step. Two proven/known surfaces:
+
+**Demo (proven, no real creds):** the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
+`demo` tenant. `POST /dev/mint?tenantId=demo` → token; `POST /tenants/demo/alpha/content/imports/qti-package`
+with `Content-Type: application/xml` + an `Idempotency-Key` header + the raw item XML body (the surface parses
+it — its rule: do NOT parse QTI locally). Read back `…/items/{id}/trust` (expect `trust_status:"trusted"`) and
+`…/student-view`. This is a real TimeBack Content surface (its QC trusts our generated hot-text/match/ebsr),
+but a sandbox tenant — NOT the live Alpha Read app, so it does not answer the render question.
+
+**Live Alpha Read (production):** push via **Ilma's `/timeback` skill**
+([incept-timeback-plugin](https://github.com/ilmych/incept-timeback-plugin)), NOT hand-rolled — she owns auth
+(Cognito body creds + token cache + 401 refresh), the push order (S3→course→units→lessons→items→tests→stimuli→
+resources(trailing `/`)→links, 409=success, checkpoint each), JSON-vs-XML branching, and GET-modify-PUT.
+Pre-flight: write-scoped Cognito client (via gitignored `.env`) + `POST /validate`. Push only to a
 `STAN-PROBE-DELETEME…` draft; post-push, open ≥1 lesson in the student UI (200 ≠ rendered).
 
 ## Verified vs open
 - **Verified (offline):** ingests the real `incept-qti-sdk` output with no hand-edits (the 4-item + 13-item all-7 fixtures); parses every item of a live course export we pulled (~1077) cleanly (no wrong keys/blanks); emits a graph whose contract-invariant fields match that export (checked by the parity tests on the course header + one round-tripped lesson); the one-command orchestrator (**stub** generator) → package passes `validate`; sanitizer + Phase-1 corrections applied; cross-checked against Ilma's skill (her corrections adopted where we differed).
-- **Open:** a real multi-lesson course end-to-end on the live skeleton + full generator output; live rendering of the tech-enhanced formats is unverified; **never POSTed to a server** (shape-match, not server-accept) — closed by `POST /validate` + the Ilma-pipeline push.
+- **Server-validated (demo tenant):** the generated QTI for Anirudh's 6 sample formats (incl. raw-XML hot-text/match/ebsr) imported clean to the platform3 content-alpha `demo` tenant via `qti-package` — QC `trust_status:"trusted"`, items `published`, student-view with answer keys hidden. Real TimeBack QC, sandbox tenant.
+- **Open:** the **live Alpha Read production** push is still pending (cred-gated); whether the Alpha Read app renders the tech-enhanced formats is the open renderer probe (test-student account); a full multi-lesson course end-to-end awaits the live skeleton + full generator.

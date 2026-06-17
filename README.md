@@ -61,15 +61,26 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   round-tripped lesson); the one-command orchestrator (stub generator) builds a package that passes the
   fail-closed validator; cross-checked against Ilma's skill (her corrections adopted where we differed);
   the full test suite + `run_all.sh`'s four layers pass.
-- **Open / unverified:** whether Alpha Read **renders** the tech-enhanced formats — the renderer probe
-  (needs a test-student account); a full multi-lesson course end-to-end (awaiting the live skeleton + full
-  generator); the package has **never been POSTed to a server** (shape-match, not server-accept — closed by
-  `POST /validate` + the Ilma push).
+- **Server-validated (demo tenant):** the generated QTI for all 6 of Anirudh's sample formats (incl. the
+  raw-XML hot-text/match/EBSR) was imported to a **TimeBack Content surface** — [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/skill_pack/pack/SKILL.md),
+  `demo` tenant — via its `qti-package` import. The platform's QTI QC returned `trust_status: "trusted"`
+  (`problem_code: null`), items `published`, student-view with answer keys hidden. Real TimeBack QC, sandbox tenant.
+- **Open / unverified:** the **live Alpha Read production** push (`qti.alpha-1edtech.ai` + `api.alpha-1edtech.ai`)
+  is still pending — it's cred-gated. Whether the Alpha Read app **renders** the tech-enhanced formats is the
+  open renderer probe (needs a test-student account); a full multi-lesson course end-to-end awaits the live
+  skeleton + full generator.
 
-## Push (manual, by design)
-Safety rail: only a course titled `STAN-PROBE-DELETEME…`, and `POST /validate` first. Paths: admin
-**Manage Courses** import · **AlphaBuild** "Sync All Lesson Plans" · direct QTI/OneRoster API. (No
-package-import endpoint exists, so QTI leaves get POSTed regardless.)
+## Upload — two real targets
+- **Demo (proven):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's
+  `grade3-reading-v2` sample → QTI → package), then import it to the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
+  `demo` tenant — `POST /dev/mint?tenantId=demo` for a token, then `POST …/imports/qti-package` with
+  `Content-Type: application/xml`, an `Idempotency-Key` header, and the raw item XML as the body (the server
+  parses — don't parse locally). Read back `…/trust` (expect `trusted`) and `…/student-view`. Sandbox tenant,
+  no real creds, throwaway data — real TimeBack QC, but **not** the live Alpha Read app.
+- **Live Alpha Read (production):** push via **Ilma's `/timeback` skill**
+  ([incept-timeback-plugin](https://github.com/ilmych/incept-timeback-plugin)), not hand-rolled — she owns
+  auth, push order, and JSON-vs-XML branching. Pre-flight `POST /validate`; write-scoped Cognito creds via a
+  gitignored `.env`; push only to a `STAN-PROBE-DELETEME…` draft; then open one lesson as a test student (200 ≠ rendered).
 
 ## Layout
 ```

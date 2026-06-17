@@ -36,6 +36,9 @@ Read **`agent.qmd`** (contract, invariants, the applied cross-check corrections,
   answer key. **XML-only** items (hot-text/match/EBSR/…) are validated as a well-formed envelope — their key
   and stem live in the verbatim XML and are not inspected. (Also gated: duplicate-id, resource↔test
   id-coupling, no authored `metadata.metrics`.)
-- **PUSH via Ilma's `/timeback` skill — do NOT hand-roll a pusher.** She owns auth, push-order, the
-  JSON-vs-XML branching, and the gotchas (200 OK ≠ rendered). Push only to a `STAN-PROBE-DELETEME…` draft,
-  and run `POST /validate` first.
+- **UPLOAD — two targets.** *Demo (proven, no real creds):* import the QTI to the [platform3 content-alpha](https://platform3-andymontgomery-9773s-projects.vercel.app/content/alpha/implementation/api)
+  `demo` tenant — `POST /dev/mint?tenantId=demo`, then `POST …/imports/qti-package` (`Content-Type: application/xml`
+  + `Idempotency-Key` + raw item XML); read back `…/trust` (expect `trusted`) + `…/student-view`. Real TimeBack QC,
+  sandbox tenant — not the live Alpha Read app. *Live (production):* push via **Ilma's `/timeback` skill** — do NOT
+  hand-roll. She owns auth, push-order, JSON-vs-XML branching, and the gotchas (200 OK ≠ rendered). Push only to a
+  `STAN-PROBE-DELETEME…` draft, `POST /validate` first, write creds via gitignored `.env`.
