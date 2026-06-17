@@ -157,6 +157,81 @@ def get_json(url, tok):
         return e.code, None
 
 
+def _localname(tag):
+    """Return an XML tag's local name (drop any '{ns}' prefix ElementTree prepends)."""
+    return tag.rsplit("}", 1)[-1] if "}" in tag else tag
+
+
+def _find_local(el, *names):
+    """First descendant whose localname is in `names` (namespace-agnostic), or None."""
+    want = set(names)
+    for d in el.iter():
+        if _localname(d.tag) in want:
+            return d
+    return None
+
+
+def parse_manifest(package):
+    """Parse `<package>/imsmanifest.xml` (if present) into item_id -> {taxon_id: value, "_title": title}.
+
+    For each <resource> we read its LOM <classification><taxonPath> whose <source><langstring> ==
+    'timeback-extended-attributes'; every <taxon> contributes {<id>: <entry><langstring>}. We also
+    capture the LOM general <title><langstring> as "_title" when present. The item_id is the
+    <resource identifier="...">, which equals the QTI item identifier we group on.
+
+    Namespaces vary across exports, so we match purely by element localname (like the rest of the
+    codebase). Missing manifest, parse error, or no taxa → return {} (graceful, never fatal)."""
+    import xml.etree.ElementTree as ET
+    path = os.path.join(package, "imsmanifest.xml")
+    if not os.path.exists(path):
+        return {}
+    try:
+        root = ET.parse(path).getroot()
+    except Exception:
+        return {}
+    out = {}
+    for res in root.iter():
+        if _localname(res.tag) != "resource":
+            continue
+        rid = res.get("identifier")
+        if not rid:
+            continue
+        attrs = {}
+        # LOM general <title><langstring>
+        for d in res.iter():
+            if _localname(d.tag) == "title":
+                ls = _find_local(d, "langstring")
+                if ls is not None and (ls.text or "").strip():
+                    attrs["_title"] = ls.text.strip()
+                    break
+        # taxonPaths sourced from timeback-extended-attributes → flat {taxon_id: value}
+        for tp in res.iter():
+            if _localname(tp.tag) != "taxonPath":
+                continue
+            src = _find_local(tp, "source")
+            src_ls = _find_local(src, "langstring") if src is not None else None
+            if src_ls is None or (src_ls.text or "").strip() != "timeback-extended-attributes":
+                continue
+            for tx in tp.iter():
+                if _localname(tx.tag) != "taxon":
+                    continue
+                tid_el = entry_el = None
+                for c in tx:
+                    ln = _localname(c.tag)
+                    if ln == "id" and tid_el is None:
+                        tid_el = c
+                    elif ln == "entry" and entry_el is None:
+                        entry_el = c
+                if tid_el is None or not (tid_el.text or "").strip():
+                    continue
+                ls = _find_local(entry_el, "langstring") if entry_el is not None else None
+                val = (ls.text or "").strip() if ls is not None and ls.text else ""
+                attrs[tid_el.text.strip()] = val
+        if attrs:
+            out[rid] = attrs
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--package", required=True, help="QTI package dir (items/*.xml + stimuli/*.xml)")
@@ -170,9 +245,18 @@ def main():
                     help="OneRoster user sourcedId to enroll as a student (creates term+class+enrollment "
                          "so the course surfaces in the student app). Use a TEST student you own — never a real child.")
     ap.add_argument("--verify", action="store_true")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="build the full plan in memory and PRINT it (course/units/articles/items incl. "
+                         "EBSR split); make ZERO network calls (works offline, no creds needed).")
+    ap.add_argument("--unit-by", default=None,
+                    help="manifest taxon id (e.g. cell_key, template_id) to group articles into units; "
+                         "default = single Unit 1")
+    ap.add_argument("--publish", action="store_true",
+                    help="publish a REAL course: publishStatus=published, lifts the DELETEME draft guard")
     a = ap.parse_args()
-    if not a.prefix.startswith("STAN-PROBE-DELETEME") and not a.allow_non_draft:
-        sys.exit("Refusing: --prefix must start with STAN-PROBE-DELETEME (or pass --allow-non-draft).")
+    # --publish implies a real, non-DELETEME prefix is OK (its own lift, separate from --allow-non-draft).
+    if not a.prefix.startswith("STAN-PROBE-DELETEME") and not a.allow_non_draft and not a.publish:
+        sys.exit("Refusing: --prefix must start with STAN-PROBE-DELETEME (or pass --allow-non-draft, or --publish).")
 
     P = a.prefix
     # Render rules (verified 2026-06-17): Alpha Read fetches assessment-tests/article_<vendorResourceId>
@@ -181,22 +265,28 @@ def main():
     # AND one article must be ONE passage + its questions (items sharing a stimulus-ref); unrelated passages in
     # one article render as an incoherent jumble. So we GROUP items by stimulus-ref → one article per passage.
     base = (re.sub(r"\D", "", P) or "90000001")[-10:]
-    COURSE, UNIT = P, P + "-unit-1"
-    state = json.load(open(a.checkpoint)) if os.path.exists(a.checkpoint) else {}
-    tok, scopes = mint_token()
-    print("token OK | scopes:", scopes or "(none)")
-    print("course:", COURSE, "| org:", a.org)
+    COURSE = P
+    PUBLISH_STATUS = "published" if a.publish else "testing"
 
-    print("--- stimuli ---")
+    # ---------------------------------------------------------------------------------------------
+    # PLAN PHASE (pure, in-memory, network-free). We resolve stimulus groups -> articles, EBSR splits,
+    # id derivation, and unit assignment up front so --dry-run can print the exact plan that would be
+    # POSTed. Manifest taxa (if --unit-by) drive unit grouping. Nothing here touches the network.
+    # ---------------------------------------------------------------------------------------------
+    manifest = parse_manifest(a.package) if a.unit_by else {}
+
+    # stimuli plan: list of (sid, title, content) to POST verbatim.
+    stim_plan = []
     for f in sorted(glob.glob(os.path.join(a.package, "stimuli", "*.xml"))):
         raw = open(f, encoding="utf-8-sig").read()
         sid = re.search(r'identifier="([^"]+)"', raw).group(1)
         title = (re.search(r'title="([^"]+)"', raw) or [None, sid])[1]
         m = re.search(r"<qti-stimulus-body[^>]*>(.*)</qti-stimulus-body>", raw, re.S)
-        post(QTI + "/stimuli", {"identifier": sid, "title": title,
-             "content": (m.group(1).strip() if m else "<p></p>")}, "stim:" + sid, tok, state, a.checkpoint)
+        stim_plan.append((sid, title, (m.group(1).strip() if m else "<p></p>")))
 
-    print("--- items (verbatim XML) + group by passage (stimulus-ref) ---")
+    # item plan: group by passage (stimulus-ref). Each group member is (post_id, title, post_xml,
+    # source_iid) — source_iid is the ORIGINAL item id (manifest key), preserved across EBSR split so
+    # both parts inherit the composite's taxon for unit grouping.
     from collections import OrderedDict
     groups, item_ids = OrderedDict(), []
     for f in sorted(glob.glob(os.path.join(a.package, "items", "*.xml"))):
@@ -212,37 +302,115 @@ def main():
         ebsr = _ebsr_split(raw)
         if ebsr:
             for pid, ptitle, pxml in ebsr:
-                groups.setdefault(key, []).append((pid, ptitle))
+                groups.setdefault(key, []).append((pid, ptitle, pxml, iid))
                 item_ids.append(pid)
-                post(QTI + "/assessment-items", {"format": "xml", "xml": pxml},
-                     "item:" + pid, tok, state, a.checkpoint)
         else:
-            groups.setdefault(key, []).append((iid, ititle))
+            groups.setdefault(key, []).append((iid, ititle, raw, iid))
             item_ids.append(iid)
-            post(QTI + "/assessment-items", {"format": "xml", "xml": raw},
-                 "item:" + iid, tok, state, a.checkpoint)
     if not item_ids:
         sys.exit("No items/*.xml found in package.")
-    print("  -> %d item(s) in %d passage-group(s) = %d article(s)" % (len(item_ids), len(groups), len(groups)))
 
-    print("--- oneroster course + unit ---")
-    post(OR + "/rostering/v1p2/courses", {"course": {
-        "sourcedId": COURSE, "status": "active", "title": a.title, "courseCode": COURSE,
-        "grades": ["3"], "subjects": ["Reading"], "org": {"sourcedId": a.org}, "primaryApp": "alpha_read",
-        "metadata": {"primaryApp": "alpha_read", "isAlphaRead": True, "publishStatus": "testing", "timebackVisible": True}}},
-        "course:" + COURSE, tok, state, a.checkpoint)
-    post(OR + "/rostering/v1p2/courses/components", {"courseComponent": {
-        "sourcedId": UNIT, "status": "active", "title": "Unit 1", "sortOrder": 1,
-        "course": {"sourcedId": COURSE}, "parent": None, "courseComponent": None, "metadata": {}}},
-        "unit:" + UNIT, tok, state, a.checkpoint)
+    # unit plan: assign each article (passage-group) to a unit. Default = single <prefix>-unit-1
+    # ("Unit 1"). With --unit-by, the article's unit = the taxon value of its FIRST item (from the
+    # manifest); distinct values become distinct units in first-seen order; missing -> "Unsorted".
+    def _clean_unit_title(v):
+        return v if v else "Unsorted"
 
-    print("--- articles (one per passage: test + lesson + resource + component-resource = article_<N>) ---")
+    unit_order = []          # list of unit keys in first-seen order
+    unit_title = {}          # unit key -> display title
+    unit_sourced = {}        # unit key -> OneRoster sourcedId
+    UNSORTED = "__unsorted__"
+
+    def _unit_key_for(members):
+        if not a.unit_by:
+            return "__single__"
+        src_iid = members[0][3]
+        val = manifest.get(src_iid, {}).get(a.unit_by)
+        return val if val else UNSORTED
+
+    # articles plan: (N, ART, LES, title, iids, unit_key, sort_within_unit)
     articles = []
     for i, (key, members) in enumerate(groups.items(), 1):
         N = base + "%02d" % i
         ART, LES = "article_" + N, P + "-lesson-%02d" % i
         iids = [m[0] for m in members]
         title = members[0][1] or a.title
+        uk = _unit_key_for(members)
+        if uk not in unit_title:
+            unit_order.append(uk)
+            unit_title[uk] = "Unit 1" if uk == "__single__" else (
+                "Unsorted" if uk == UNSORTED else _clean_unit_title(uk))
+        articles.append([N, ART, LES, title, iids, uk, i])
+    # assign stable unit sourcedIds in first-seen order
+    for k, uk in enumerate(unit_order, 1):
+        if uk == "__single__":
+            unit_sourced[uk] = P + "-unit-1"
+        elif uk == UNSORTED:
+            unit_sourced[uk] = P + "-unit-unsorted"
+        else:
+            unit_sourced[uk] = P + "-unit-%d" % k
+
+    # --------- DRY-RUN: print the plan, make ZERO network calls, then return. ---------
+    if a.dry_run:
+        print("=== DRY RUN (no network) ===")
+        if a.publish:
+            print("=== PUBLISH (real course) === id=%s org=%s publishStatus=published articles=%d "
+                  "— would POST live ===" % (COURSE, a.org, len(articles)))
+        print("course:", COURSE, "| org:", a.org, "| publishStatus:", PUBLISH_STATUS,
+              "| primaryApp: alpha_read")
+        print("unit-by:", a.unit_by or "(none → single Unit 1)")
+        print("stimuli: %d | items: %d in %d passage-group(s) = %d article(s) | units: %d"
+              % (len(stim_plan), len(item_ids), len(groups), len(articles), len(unit_order)))
+        print("plan tree:")
+        for uk in unit_order:
+            print("  unit %s  (%s)" % (unit_sourced[uk], unit_title[uk]))
+            for (N, ART, LES, title, iids, auk, _so) in articles:
+                if auk != uk:
+                    continue
+                print("    %s  (%s)" % (ART, title))
+                for x in iids:
+                    print("      - %s" % x)
+        return
+
+    # ---------------------------------------------------------------------------------------------
+    # EXECUTE PHASE (network). Reached only when NOT --dry-run.
+    # ---------------------------------------------------------------------------------------------
+    if a.publish:
+        print("=== PUBLISH (real course) === id=%s org=%s publishStatus=published articles=%d "
+              "— POSTing live ===" % (COURSE, a.org, len(articles)))
+    state = json.load(open(a.checkpoint)) if os.path.exists(a.checkpoint) else {}
+    tok, scopes = mint_token()
+    print("token OK | scopes:", scopes or "(none)")
+    print("course:", COURSE, "| org:", a.org, "| publishStatus:", PUBLISH_STATUS)
+
+    print("--- stimuli ---")
+    for sid, title, content in stim_plan:
+        post(QTI + "/stimuli", {"identifier": sid, "title": title,
+             "content": content}, "stim:" + sid, tok, state, a.checkpoint)
+
+    print("--- items (verbatim XML) + group by passage (stimulus-ref) ---")
+    for key, members in groups.items():
+        for (pid, _ptitle, pxml, _src) in members:
+            post(QTI + "/assessment-items", {"format": "xml", "xml": pxml},
+                 "item:" + pid, tok, state, a.checkpoint)
+    print("  -> %d item(s) in %d passage-group(s) = %d article(s)" % (len(item_ids), len(groups), len(groups)))
+
+    print("--- oneroster course + unit(s) ---")
+    post(OR + "/rostering/v1p2/courses", {"course": {
+        "sourcedId": COURSE, "status": "active", "title": a.title, "courseCode": COURSE,
+        "grades": ["3"], "subjects": ["Reading"], "org": {"sourcedId": a.org}, "primaryApp": "alpha_read",
+        "metadata": {"primaryApp": "alpha_read", "isAlphaRead": True, "publishStatus": PUBLISH_STATUS, "timebackVisible": True}}},
+        "course:" + COURSE, tok, state, a.checkpoint)
+    for k, uk in enumerate(unit_order, 1):
+        post(OR + "/rostering/v1p2/courses/components", {"courseComponent": {
+            "sourcedId": unit_sourced[uk], "status": "active", "title": unit_title[uk], "sortOrder": k,
+            "course": {"sourcedId": COURSE}, "parent": None, "courseComponent": None, "metadata": {}}},
+            "unit:" + unit_sourced[uk], tok, state, a.checkpoint)
+
+    print("--- articles (one per passage: test + lesson + resource + component-resource = article_<N>) ---")
+    pub_articles = []
+    for (N, ART, LES, title, iids, uk, sort_order) in articles:
+        UNIT = unit_sourced[uk]
         post(QTI + "/assessment-tests", {"identifier": ART, "title": title,
             "qti-test-part": [{"identifier": "tp1", "navigationMode": "nonlinear", "submissionMode": "individual",
                 "qti-assessment-section": [{"identifier": "sec1", "title": title, "visible": True, "required": True,
@@ -251,7 +419,7 @@ def main():
             "qti-outcome-declaration": [{"identifier": "SCORE", "cardinality": "single", "baseType": "float"}]},
             "test:" + ART, tok, state, a.checkpoint)
         post(OR + "/rostering/v1p2/courses/components", {"courseComponent": {
-            "sourcedId": LES, "status": "active", "title": title, "sortOrder": i,
+            "sourcedId": LES, "status": "active", "title": title, "sortOrder": sort_order,
             "course": {"sourcedId": COURSE}, "parent": {"sourcedId": UNIT}, "courseComponent": {"sourcedId": UNIT},
             "metadata": {}}}, "lesson:" + LES, tok, state, a.checkpoint)
         post(OR + "/resources/v1p2/resources/", {"resource": {
@@ -263,7 +431,8 @@ def main():
             "sourcedId": ART, "status": "active", "title": title, "sortOrder": 1,
             "resource": {"sourcedId": ART}, "courseComponent": {"sourcedId": LES},
             "metadata": {"lessonType": "alpha-read-article"}}}, "cr:" + ART, tok, state, a.checkpoint)
-        articles.append((N, ART, title, len(iids)))
+        pub_articles.append((N, ART, title, len(iids)))
+    articles = pub_articles
 
     if a.enroll_student:
         # Make the course surface in the student app: term (in --org) -> class (course+org+term) -> enrollment.
