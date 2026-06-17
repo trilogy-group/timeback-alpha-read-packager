@@ -73,13 +73,15 @@ Then `arpack` assembles the OneRoster+QTI graph, runs a **fail-closed validator*
   **renders in AlphaBuild**: all 6 formats appear (Choice/Match/Order/Composite-EBSR/HotText), the QTI panel
   shows **✅ Valid**, and the **"Preview (from Timeback) LIVE"** renders the real two-pane reading view
   (passage + question + selectable options).
-- **Student render wired (2026-06-17):** a test student (own profile, `student` role) enrolled via
-  term→class→enrollment (`push_to_timeback.py --enroll-student <userId>`); the course surfaces in the
-  student's class list. The only non-automatable step is the student **login** (no agent account creation /
-  authentication as a student).
-- **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator. *Org gotcha:* a
-  draft must land in an org the viewer belongs to (the example org `346488d3…` → "Access denied"; the viewer's
-  own org renders); a class's `terms` must be in the class's `org`.
+- **Student-app render confirmed (2026-06-17):** the real ELA article renders **end-to-end in the live Alpha
+  Read student app** — `https://alpharead.alpha-1edtech.ai/articles?articleId=<N>&crsid=article_<N>` shows the
+  passage → guiding-question unlock flow (a 25-step reading session whose step types match the live article).
+  A test student (own profile, `student` role) is enrolled via term→class→enrollment
+  (`push_to_timeback.py --enroll-student <userId>`). Only the student **login** is non-automatable.
+- **Open:** a full multi-lesson course end-to-end awaits the live skeleton + full generator.
+  *Gotchas baked into the tool:* `vendorResourceId` must be the bare number (test at `article_<N>`); the
+  student URL needs both `articleId` + `crsid`; a draft must land in an org the viewer belongs to; a class's
+  `terms` must share the class's `org`.
 
 ## Upload — two real targets
 - **Demo (proven):** build the QTI from real generated content with `examples/g3v2_demo_bridge.py` (Anirudh's

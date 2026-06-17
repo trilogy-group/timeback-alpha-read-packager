@@ -195,8 +195,10 @@ def main():
         print("  test GET:", sc, "| item refs:", len(refs))
 
     print("\n=== DONE ===")
-    print("AlphaBuild course :", "https://app.alpha-build.org/content/" + COURSE)
+    print("AlphaBuild course   :", "https://app.alpha-build.org/content/" + COURSE)
     print("Quiz items (preview):", "https://app.alpha-build.org/questionbanks/%s/question/%s" % (TEST, item_ids[0]))
+    # The Alpha Read STUDENT app needs BOTH articleId=<N> and crsid=article_<N> (verified 2026-06-17).
+    print("Alpha Read (student):", "https://alpharead.alpha-1edtech.ai/articles?articleId=%s&crsid=%s" % (ARTNUM, TEST))
     print("items:", len(item_ids))
 
 
