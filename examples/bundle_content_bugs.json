@@ -1,0 +1,386 @@
+{
+ "must_fix": [
+  {
+   "item_id": "8bdf39e1-28fd-4762-8589-552fc25c9a08",
+   "unit": "Animals & Classification",
+   "lesson": "L1: Backbone or No Backbone?",
+   "type": "match",
+   "substandard": "RI.3.1",
+   "category": "unanswerable-outside-knowledge",
+   "reason": "match cites a source text not embedded in the item",
+   "stem": "Drag each animal to the correct box based on what you read."
+  },
+  {
+   "item_id": "d5fc7dce-277a-451a-85cf-09aa8411cffe",
+   "unit": "Animals & Classification",
+   "lesson": "L2: Meet the Mammals",
+   "type": "match",
+   "substandard": "RI.3.1",
+   "category": "unanswerable-outside-knowledge",
+   "reason": "match cites a source text not embedded in the item",
+   "stem": "Drag each animal to the correct box based on what you read in the text."
+  },
+  {
+   "item_id": "aac37d34-715c-4249-bcf0-7ad26f32b177",
+   "unit": "Animals & Classification",
+   "lesson": "L3: Birds, Fish, and Their Cousins",
+   "type": "match",
+   "substandard": "RI.3.1",
+   "category": "unanswerable-outside-knowledge",
+   "reason": "match cites a source text not embedded in the item",
+   "stem": "Drag each word to the correct box based on what you read in the text."
+  },
+  {
+   "item_id": "3d26ce05-eb25-4247-83d2-bcde1e1154c6",
+   "unit": "Norse Mythology",
+   "lesson": "L1: Who Were the Norse? A World of Nine Realms",
+   "type": "mcq",
+   "substandard": "RL.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "asks how a picture/diagram helps; image not rendered",
+   "stem": "How does the picture of the tree help you understand the nine realms better than the words alone?"
+  },
+  {
+   "item_id": "a3931c54-8b39-41e0-b45d-a70cbc092bd3",
+   "unit": "Norse Mythology",
+   "lesson": "L3: Loki the Trickster: Choices Cause Consequences (plus a dwarf fact file)",
+   "type": "mcq",
+   "substandard": "RL.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "asks how a picture/diagram helps; image not rendered",
+   "stem": "How does the picture of the dwarf workshop help you understand the information in the 'Who Were the Dwarves?' section?"
+  },
+  {
+   "item_id": "7357bfce-b602-4178-8e91-5e2bfafeb2b5",
+   "unit": "Norse Mythology",
+   "lesson": "L4: Saga-Keeper: Predict and Retell a New Myth",
+   "type": "mcq",
+   "substandard": "RL.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "asks how a picture/diagram helps; image not rendered",
+   "stem": "How does the picture of Freya, Heimdall, and the seal help you understand how they reclaimed the necklace?"
+  },
+  {
+   "item_id": "d1a1bbd9-895a-4d12-a907-d2b6588a0986",
+   "unit": "Norse Mythology",
+   "lesson": "Norse Mythology \u2014 Gate",
+   "type": "mcq",
+   "substandard": "RL.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "asks how a picture/diagram helps; image not rendered",
+   "stem": "How does the picture of Brokkr and the fly help you understand why the hammer has a short handle?"
+  },
+  {
+   "item_id": "81cebfd5-75d6-4051-9c81-ff4d00254520",
+   "unit": "Space",
+   "lesson": "L4: Rocky Worlds and Gas Giants",
+   "type": "match",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "Confirmed via live QTI rawXml. The q01-match stimulus body contains ONLY the instruction sentence 'Read the passage and look at the planet chart. Use both the w",
+   "stem": "Match each planet to its correct description based on its physical features and type."
+  },
+  {
+   "item_id": "b840c8fc-9bfe-4360-8beb-b89d7f17fcbf",
+   "unit": "Space",
+   "lesson": "Space \u2014 Gate",
+   "type": "match",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "match needs diagram labels",
+   "stem": "Match each labeled part from the diagram to its correct description from the text."
+  },
+  {
+   "item_id": "7c037ae7-6bca-4001-9301-2e6451f9a3cd",
+   "unit": "Ancient Rome",
+   "lesson": "Ancient Rome \u2014 Gate",
+   "type": "ebsr",
+   "substandard": "RI.3.1",
+   "category": "key-error",
+   "reason": "Part A key marks B 'To let smoke from cooking fires escape' as correct, but the shown passage contains no mention of smoke, fire, or cooking. The passage's stat",
+   "stem": "According to the passage, why did wealthy Romans have an open ceiling in the atrium?"
+  },
+  {
+   "item_id": "470905be-9fdf-4855-a7c1-d710896cc435",
+   "unit": "Light & Sound",
+   "lesson": "L3: Pip's Lantern Problem",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about the shadow that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "5183b852-3216-492f-8ef3-da3c55a02e9b",
+   "unit": "Light & Sound",
+   "lesson": "L3: Pip's Lantern Problem",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about the shadow that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "ddc4ddd0-201f-4fad-b24f-83d3ee99586d",
+   "unit": "Light & Sound",
+   "lesson": "L3: Pip's Lantern Problem",
+   "type": "match",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "match needs diagram labels",
+   "stem": "Look at the diagram and read the text. Match each object to the sentence that describes both what it does and where it is shown."
+  },
+  {
+   "item_id": "4cc49ccd-23fb-40c0-bd8f-668cf7345985",
+   "unit": "Light & Sound",
+   "lesson": "Light & Sound \u2014 Gate",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about the sound waves that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "cee5dd26-7676-4134-b1d0-f444a05726c6",
+   "unit": "The Human Body",
+   "lesson": "The Frame That Holds You Up",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about marrow that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "1c8fd18f-79d8-43d0-a1e4-347a43876b9f",
+   "unit": "The Human Body",
+   "lesson": "The Frame That Holds You Up",
+   "type": "sequence",
+   "substandard": "RI.3.2",
+   "category": "key-error",
+   "reason": "Passage explicitly orders the bone layers outside-to-inside: compact bone (very outside) -> spongy bone (middle) -> marrow (center). The stem asks to order laye",
+   "stem": "Drag the layers of a bone into the correct order, from the outside of the bone to the very inside."
+  },
+  {
+   "item_id": "33b17990-3e58-45ba-af4f-f0462025b222",
+   "unit": "The Human Body",
+   "lesson": "The Frame That Holds You Up",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about a bone that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "fa1f0847-dfeb-48b2-bc19-3c342b2ed6fb",
+   "unit": "The Human Body",
+   "lesson": "The Body's Delivery Route",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about the blood's path that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "f550a849-f30d-4761-9d95-02afe9a99224",
+   "unit": "The Human Body",
+   "lesson": "The Body's Delivery Route",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about the blood's route that is NOT described in the words of the passage?"
+  },
+  {
+   "item_id": "b9e95e4f-fc50-4c36-922a-ef3a1beb1852",
+   "unit": "The Human Body",
+   "lesson": "The Human Body \u2014 Gate",
+   "type": "mcq",
+   "substandard": "RI.3.7",
+   "category": "unanswerable-needs-visual",
+   "reason": "stem asks for diagram-only info",
+   "stem": "What does the diagram show about breathing that is NOT described in the words of the passage?"
+  }
+ ],
+ "consider": [
+  {
+   "item_id": "6c961138-e3c6-4d45-9963-8bda33e00d05",
+   "unit": "Animals & Classification",
+   "lesson": "L2: Meet the Mammals",
+   "type": "hot-text",
+   "substandard": "RI.3.4",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "The text talks about 'mammals.' Click the sentence that tells you exactly what a mammal is."
+  },
+  {
+   "item_id": "1f451e4c-2367-4b60-be69-6a94e63f18c8",
+   "unit": "Norse Mythology",
+   "lesson": "L1: Who Were the Norse? A World of Nine Realms",
+   "type": "mcq",
+   "substandard": "RL.3.1",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Which text structure does this passage mainly use?"
+  },
+  {
+   "item_id": "239efcf5-03de-43f7-9bfc-a2657fc083d8",
+   "unit": "Space",
+   "lesson": "L2: Planets and Moons",
+   "type": "match",
+   "substandard": "RI.3.7",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Match each space object to the correct path it takes."
+  },
+  {
+   "item_id": "1ebb61e0-a540-4302-aeba-0853d2f18dff",
+   "unit": "Space",
+   "lesson": "L4: Rocky Worlds and Gas Giants",
+   "type": "hot-text",
+   "substandard": "RI.3.7",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Look at the table to find the planet that does NOT have a solid surface. Then, click the sentence in the text that explains how th"
+  },
+  {
+   "item_id": "7ab71e5b-c287-442a-8c77-e24c745ad866",
+   "unit": "Ancient Rome",
+   "lesson": "Who Ruled the Republic?",
+   "type": "mcq",
+   "substandard": "RI.3.8",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "According to the passage, what caused the noble leaders to let the common people elect their own leaders?"
+  },
+  {
+   "item_id": "bb5d8f84-6d99-44a4-b92f-0db670eda666",
+   "unit": "Ancient Rome",
+   "lesson": "Who Ruled the Republic?",
+   "type": "hot-text",
+   "substandard": "RI.3.8",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Read the paragraph. Click on the sentence that shows the **result** of electing a special council."
+  },
+  {
+   "item_id": "99a9fd53-b1f3-4742-b8de-fa96d622449c",
+   "unit": "Ancient Rome",
+   "lesson": "Roads and Water That Built an Empire",
+   "type": "hot-text",
+   "substandard": "RI.3.8",
+   "category": "ambiguous-multiple-correct",
+   "reason": "Confirmed against live content. Passage tokens: t1 (lead-in), t2 'First, the engineer found a fresh water supply in the hills.', t3 'Next, workers dug a long ch",
+   "stem": "Read the paragraph. Click on the ONE sentence that best shows or signals that the entire passage is organized as a sequence (a ser"
+  },
+  {
+   "item_id": "d8cec5dc-a741-4a2e-bca6-659f5bdbd190",
+   "unit": "Native Americans",
+   "lesson": "L1: Not One People \u2014 Many Nations",
+   "type": "hot-text",
+   "substandard": "RI.3.2",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Click the sentence in the passage that best states the main idea of the entire text."
+  },
+  {
+   "item_id": "6b1e0dec-bc58-4c22-823a-b96049e72e03",
+   "unit": "Light & Sound",
+   "lesson": "L1: Straight Lines & the Birth of a Shadow",
+   "type": "hot-text",
+   "substandard": "RI.3.3",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Click the ONE sentence in the passage that shows the CAUSE of the dark shape forming on the wall."
+  },
+  {
+   "item_id": "3204f989-cd4c-417a-8bd4-98dfabfaf86a",
+   "unit": "Light & Sound",
+   "lesson": "L3: Pip's Lantern Problem",
+   "type": "hot-text",
+   "substandard": "RI.3.1",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Click the sentence that best shows the actions in the passage are a series of steps in a sequence."
+  },
+  {
+   "item_id": "7759ba61-da40-453d-8793-714f52eabdc5",
+   "unit": "The Human Body",
+   "lesson": "Every Breath You Take",
+   "type": "match",
+   "substandard": "RI.3.8",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "The passage describes what happens to your breathing when you run. Match each event from the text to whether it is a Cause (why it"
+  },
+  {
+   "item_id": "ce019097-3ebe-419f-be78-b1b9ec10f00c",
+   "unit": "The Human Body",
+   "lesson": "Every Breath You Take",
+   "type": "hot-text",
+   "substandard": "RI.3.8",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Read the passage. Click on the sentence that uses a signal word to show a cause-and-effect connection."
+  },
+  {
+   "item_id": "00a7b18a-202a-4cbd-a90d-79a394feb565",
+   "unit": "The Human Body",
+   "lesson": "All Systems Working Together",
+   "type": "hot-text",
+   "substandard": "RI.3.3",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Click the ONE sentence in the passage that best signals a compare-and-contrast relationship between the two body systems by using "
+  },
+  {
+   "item_id": "d5662914-5ac0-4c86-a121-6ecda215cfd7",
+   "unit": "The Age of Exploration",
+   "lesson": "The Age of Exploration \u2014 Gate",
+   "type": "match",
+   "substandard": "L.3.6",
+   "category": "unclear-stem",
+   "reason": "Verified against the live deployed stimulus. The full qti-stimulus-body for grade3-reading-ela-pp-9701-u7-l3-q10-match-s (HTTP 200, 598-char content dict) conta",
+   "stem": "Match each word from the story to the type of relationship it signals."
+  },
+  {
+   "item_id": "aa085cac-36a6-4382-92f0-090756f65efd",
+   "unit": "Classic Literature",
+   "lesson": "As Slow as Honey",
+   "type": "hot-text",
+   "substandard": "RL.3.3",
+   "category": "ambiguous/unclear (QA-flagged)",
+   "reason": "flagged by adversarial QA; pruned conservatively",
+   "stem": "Click the ONE sentence in the story that best uses a cause-and-effect signal word to show how one event directly led to another."
+  },
+  {
+   "item_id": "107c357e-1395-4d00-b968-b646b4b318d1",
+   "unit": "Classic Literature",
+   "lesson": "Two Travelers, One Lesson",
+   "type": "hot-text",
+   "substandard": "RL.3.9",
+   "category": "ambiguous-multiple-correct",
+   "reason": "Confirmed against live dump. Q9 (hottext) stem: 'Click the ONE sentence that uses a transition phrase to signal a contrast between the two travelers.' KEY = s3 ",
+   "stem": "Read the passage. Click the ONE sentence that uses a transition phrase to signal a contrast between the two travelers."
+  },
+  {
+   "item_id": "4ae5dd56-a1f7-48dc-ada2-efd20930609e",
+   "unit": "Ecology & Environment",
+   "lesson": "What Holds a Place Together",
+   "type": "match",
+   "substandard": "RI.3.3",
+   "category": "ambiguous-multiple-correct",
+   "reason": "Confirmed against the live passage. The passage is one continuous transitive causal chain: wolves chasing elk away (item_1) -> 'New willow trees started growing",
+   "stem": "Based on the passage, match each scientific detail to show whether it is a Cause or an Effect."
+  },
+  {
+   "item_id": "dcf6c75d-9388-4e1e-a700-74e43a0d1175",
+   "unit": "Ecology & Environment",
+   "lesson": "Weighing the Fix",
+   "type": "match",
+   "substandard": "L.3.6",
+   "category": "unclear-stem",
+   "reason": "Confirmed against live dump. The q13 PASSAGE field contains ONLY the instruction line: \"Read the argument 'Should We Take the Dam Down?' and look at how the wor",
+   "stem": "Match each word from the passage to the type of relationship it signals."
+  }
+ ]
+}
