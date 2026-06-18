@@ -49,32 +49,39 @@ def main():
 
     PRE = a.prefix
     item_base = P.QTI + "/assessment-items"
+    tok, _ = P.mint_token()
     affected = []
     for ei in sorted(by_ei):
         ls = sorted(by_ei[ei], key=lambda x: x["li"])
         for li, L in enumerate(ls):
-            ids, kept, removed = [], [], 0
+            drop_ids = set()
             for qi, q in enumerate(L["items"], 1):
                 iid = "%s-u%d-l%d-q%02d-%s" % (PRE, ei, li, qi, q["type"].replace("-", ""))
                 if q["item_id"] in drop:
-                    removed += 1
-                else:
-                    kept.append(iid)
-            if removed:
-                test_id = "%s-u%d-l%d-test" % (PRE, ei, li)
-                affected.append({"test": test_id, "title": L["title"], "ei": ei, "li": li,
-                                 "before": len(L["items"]), "after": len(kept), "kept": kept})
+                    drop_ids.add(iid)
+            if not drop_ids:
+                continue
+            test_id = "%s-u%d-l%d-test" % (PRE, ei, li)
+            # Derive `kept` from the LIVE deployed bank, NOT the bundle — so we never PUT a ref to an
+            # item that was skipped at publish time (and we respect prior prunes).
+            sv, q = P.get_json(P.QTI + "/assessment-tests/%s/questions" % test_id, tok)
+            live = [(it.get("reference") or {}).get("identifier") for it in (q or {}).get("questions", [])] if sv == 200 else []
+            kept = [i for i in live if i not in drop_ids]
+            if len(kept) == len(live):
+                continue  # nothing actually live to drop here
+            affected.append({"test": test_id, "title": L["title"], "before": len(live),
+                             "after": len(kept), "kept": kept})
 
     print("\naffected tests:", len(affected))
     for t in affected:
         flag = "  <-- BELOW 8" if t["after"] < 8 else ""
         print("  %-40s %2d -> %2d%s" % (t["test"], t["before"], t["after"], flag))
 
-    if a.dry_run:
-        print("\nDRY-RUN. (--one to PUT first test, --apply to PUT all)")
+    # MUTATION GATE: only PUT when explicitly asked (--apply for all, --one for the first test).
+    if a.dry_run or not (a.apply or a.one):
+        print("\nDRY-RUN (no changes written). Re-run with --apply to PUT all, or --one to PUT just the first.")
         return
 
-    tok, _ = P.mint_token()
     todo = affected[:1] if a.one else affected
     for t in todo:
         body = test_json(t["test"], t["title"], t["kept"], item_base)

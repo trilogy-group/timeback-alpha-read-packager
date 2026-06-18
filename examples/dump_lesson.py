@@ -5,7 +5,8 @@ ordered lesson_index)."""
 import json, argparse, os
 from collections import OrderedDict
 
-RAW = "/Users/stanhus/Documents/grade3-reading/knowledge_bot/_archive/raw/course_bundle.jsonl"
+# Default bundle path is overridable via $G3_BUNDLE or --bundle (no hardcoded personal path).
+RAW = os.environ.get("G3_BUNDLE", "course_bundle.jsonl")
 QTYPES = {"mcq", "msq", "sequence", "hot-text", "match", "ebsr"}
 
 
@@ -30,12 +31,16 @@ def main():
         elif r["type"] in QTYPES:
             L["items"].append(r)
 
-    keys = [k for k in lessons if lessons[k]["items"]]
-    keys.sort(key=lambda k: lessons[k]["lesson_index"])
+    # Index over ALL lessons in the unit (sorted by lesson_index), matching publish_powerpath's
+    # `enumerate(ekeys)` — item-less lessons consume an ordinal there too, so -uN-lM ids line up.
+    keys = sorted(lessons.keys(), key=lambda k: lessons[k]["lesson_index"])
     if a.li >= len(keys):
         print("NO SUCH LESSON (ei=%d li=%d; this unit has %d lessons)" % (a.ei, a.li, len(keys)))
         return
     L = lessons[keys[a.li]]
+    if not L["items"]:
+        print("LESSON %d in unit %d has no question items (not deployed as -u%d-l%d)." % (a.li, a.ei, a.ei, a.li))
+        return
     art = L["article"] or {}
     print("LESSON: %s   (unit %d, lesson %d)" % (L["title"], a.ei, a.li))
     print("=" * 70)

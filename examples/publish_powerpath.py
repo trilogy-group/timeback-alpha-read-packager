@@ -245,8 +245,6 @@ def build_plan(a):
             if not L["items"]:
                 continue
             lesson_id = "%s-u%d-l%d" % (PRE, ei, li)
-            lessons.append({"sourcedId": lesson_id, "title": L["title"],
-                            "sortOrder": (li + 1) * 10, "unit_sourcedId": unit_id})
             art = L["article"] or {"title": L["title"], "content": ""}
             art_html = passage_html(art)
             test_id = "%s-test" % lesson_id
@@ -272,6 +270,10 @@ def build_plan(a):
                                    "questionId": iid, "title": ("PowerPath Question: %s" % qstem)[:240]})
             if not qitems:
                 continue
+            # Only register the lesson component once it actually has a powerpath block — never POST
+            # an orphan lesson with no test/resource/ALIs.
+            lessons.append({"sourcedId": lesson_id, "title": L["title"],
+                            "sortOrder": (li + 1) * 10, "unit_sourcedId": unit_id})
             parent_ali = "%s-ali" % lesson_id
             lesson_blocks.append({
                 "lesson_id": lesson_id, "title": L["title"], "test_id": test_id,
