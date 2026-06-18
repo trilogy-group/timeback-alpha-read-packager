@@ -7,6 +7,12 @@ It also pushes live (verified 2026-06-17). Note the scope gap: the package can c
 formats**, but the Alpha Read **reading** renderer displays a narrower set — **single-select `choice` + `order`** —
 so for reading content, target those (the packager auto-decomposes EBSR → two choice items). See *Render reality*.
 
+> ⚡ **Need match / hot-text / EBSR / sequence to render? See [`POWERPATH.md`](POWERPATH.md).** The narrow
+> render set below (single-select choice + order only) is specific to the **`alpha-read-article`** lessonType
+> on the **AlphaRead app**. The **`powerpath-100`** lessonType on the **TimeBack UI** (`alpha.timeback.com`)
+> renders **all** question types. Verified 2026-06-17 (`examples/publish_powerpath.py`). For rich reading
+> content, that's the path — not alpha-read-article.
+
 > **Publishing to Alpha Read? Read [`RULES.md`](RULES.md) first** — the evidence-tagged rules for what
 > renders (single-select choice + order only), what to author, and the exact publish command.
 

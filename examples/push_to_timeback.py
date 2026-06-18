@@ -135,14 +135,19 @@ def post(url, body, label, tok, state, ckpt):
             print("  OK  %-28s HTTP %s" % (label, r.status))
             return True
         except urllib.error.HTTPError as e:
-            if e.code == 409:
-                state[label] = {"status": 409, "note": "exists"}
+            body = b""
+            try: body = e.read()
+            except Exception: pass
+            # 409 = exists. This OneRoster API also returns 404 with "already exists" for duplicates.
+            # Gate on those statuses so an unrelated error that merely mentions the phrase isn't masked.
+            if e.code == 409 or (e.code == 404 and b"already exists" in body):
+                state[label] = {"status": e.code, "note": "exists"}
                 json.dump(state, open(ckpt, "w"), indent=1)
-                print("  OK  %-28s HTTP 409 (exists)" % label)
+                print("  OK  %-28s HTTP %s (exists)" % (label, e.code))
                 return True
             if e.code in (429, 500, 502, 503, 504) and attempt < 2:
                 time.sleep([5, 15, 30][attempt]); continue
-            print("  ERR %-28s HTTP %s %s" % (label, e.code, e.read()[:200])); return False
+            print("  ERR %-28s HTTP %s %s" % (label, e.code, body[:200])); return False
         except Exception as e:
             if attempt < 2:
                 time.sleep([5, 15, 30][attempt]); continue
