@@ -1,0 +1,89 @@
+[
+  {
+    "type": "mcq",
+    "difficulty": "medium",
+    "ccss": "RL.5.1",
+    "stem": "What can the reader MOST reasonably infer about why Mara left the harvest baskets unguarded that evening?",
+    "options": [
+      {"id": "a", "text": "She trusted that no one in the valley would take what was not theirs."},
+      {"id": "b", "text": "She had grown too tired from the long day to carry them indoors."},
+      {"id": "c", "text": "She expected her brother to return soon and move them himself."},
+      {"id": "d", "text": "She believed the coming frost would ruin the fruit no matter what."}
+    ],
+    "key": "c",
+    "feedback": "The passage never states the reason outright, so you must combine clues. Mara 'glanced once toward the road, where Tomas was due back by dusk' and then 'left the baskets where they sat,' telling herself the work could keep. Those two details together point to (c): she expected Tomas to return and handle them. Option (b) is tempting, but the text says she 'still had strength in her arms,' ruling out tiredness. The passage gives no hint about trust (a) or frost ruining the fruit (d).",
+    "skill": "inference",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "type": "mcq",
+    "difficulty": "hard",
+    "ccss": "RL.5.1",
+    "stem": "Which inference about Tomas is BEST supported by the passage?",
+    "options": [
+      {"id": "a", "text": "He resented being asked to handle all of the heavy orchard work alone."},
+      {"id": "b", "text": "He was delayed by something he judged more pressing than the fruit."},
+      {"id": "c", "text": "He had quietly decided to abandon the harvest and leave the valley behind."},
+      {"id": "d", "text": "He was a careless worker whom Mara had slowly learned not to rely upon."}
+    ],
+    "key": "b",
+    "feedback": "No sentence tells you directly why Tomas was late. You infer it from two clues: he 'came up the road well after the stars, his coat dark with another man's trouble,' and he 'said only that the Hale family's roof had not waited.' Together these show he was delayed helping the Hales with an urgent problem (b). Option (d) contradicts the text, since Mara expected him back 'by dusk' and counted on him. Nothing supports resentment (a) or leaving for good (c).",
+    "skill": "inference",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "type": "mcq",
+    "difficulty": "medium",
+    "ccss": "RL.5.1",
+    "stem": "What does the passage suggest about how Mara felt when she saw Tomas finally arrive?",
+    "options": [
+      {"id": "a", "text": "Her worry eased, even though she did not say so aloud."},
+      {"id": "b", "text": "She was angry that the baskets had sat out so long."},
+      {"id": "c", "text": "She was disappointed that he had returned empty-handed."},
+      {"id": "d", "text": "She felt nothing, having forgotten he was expected."}
+    ],
+    "key": "a",
+    "feedback": "Mara's feeling is shown, not stated. The text says her 'shoulders, which had been set tight all evening, loosened at the shape of him on the road.' A body unclenching after being tense signals relief, so her worry eased (a). The passage shows no anger about the baskets (b), and Tomas's hands are never described as empty (c). Since she watched the road for him, (d) is wrong.",
+    "skill": "inference",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "type": "hottext",
+    "difficulty": "hard",
+    "ccss": "RL.5.1",
+    "stem": "Select the ONE sentence that BEST lets the reader infer that Tomas had been helping someone else before he got home, rather than simply running late.",
+    "options": [
+      {"id": "s1", "text": "Mara stacked the last of the pears and glanced once toward the road, where Tomas was due back by dusk."},
+      {"id": "s2", "text": "She still had strength in her arms, but she left the baskets where they sat, telling herself that the unfinished work could keep until the morning light returned."},
+      {"id": "s3", "text": "The valley went blue, then black, and the road stayed empty longer than she liked."},
+      {"id": "s4", "text": "Tomas came up the road well after the stars, his coat dark with another man's trouble, and said only that the Hale family's roof had not waited."},
+      {"id": "s5", "text": "Her shoulders, which had been set tight all evening, loosened at the shape of him on the road."}
+    ],
+    "key": "s4",
+    "feedback": "The question asks which sentence shows Tomas was HELPING someone, not just late. Sentence s4 carries that inference: his 'coat dark with another man's trouble' and the remark that 'the Hale family's roof had not waited' imply he had been working on the Hales' roof. Sentence s3 shows only that he was late, and s5 shows Mara's relief, not where Tomas had been. The answer is s4.",
+    "skill": "inference",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "type": "hottext",
+    "difficulty": "medium",
+    "ccss": "RL.5.1",
+    "stem": "Select the ONE sentence that BEST supports the inference that Mara grew uneasy as the evening went on.",
+    "options": [
+      {"id": "s1", "text": "Mara stacked the last of the pears and glanced once toward the road, where Tomas was due back by dusk."},
+      {"id": "s2", "text": "She still had strength in her arms, but she left the baskets where they sat, telling herself that the unfinished work could keep until the morning light returned."},
+      {"id": "s3", "text": "The valley went blue, then black, and the road stayed empty longer than she liked."},
+      {"id": "s4", "text": "Tomas came up the road well after the stars, his coat dark with another man's trouble, and said only that the Hale family's roof had not waited."},
+      {"id": "s5", "text": "Her shoulders, which had been set tight all evening, loosened at the shape of him on the road."}
+    ],
+    "key": "s3",
+    "feedback": "The question asks which sentence shows Mara's growing unease. Sentence s3 does it: the road 'stayed empty longer than she liked' signals her discomfort as time passed. Sentence s1 only sets up that she expected him; s5 describes the moment her unease lifted, not when it grew. The answer is s3.",
+    "skill": "inference",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  }
+]

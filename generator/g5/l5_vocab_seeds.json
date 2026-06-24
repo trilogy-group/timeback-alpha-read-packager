@@ -1,0 +1,452 @@
+[
+  {
+    "id": "L5_vocab_001",
+    "type": "mcq",
+    "ccss": "L.5.4a",
+    "difficulty": "easy",
+    "lexile": "850L",
+    "passage_text": "When geologists study a rock formation, they examine each layer carefully. The oldest rocks settle at the bottom, while younger layers form on top. Scientists call this principle 'superposition.' One geologist described the canyon wall as a 'table of contents' for Earth's history — each stratum holding clues about the environment that existed millions of years ago. A single layer might contain fossils of creatures that lived only during a narrow window of time. By reading the strata from bottom to top, scientists can reconstruct a timeline stretching back hundreds of millions of years. This method allows researchers to date events without any equipment beyond a careful eye and a solid understanding of rock chemistry.",
+    "stem": "As used in the passage, the word \"stratum\" most nearly means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "a thin, distinct layer of rock"
+      },
+      {
+        "id": "B",
+        "text": "a type of cloud formation found at low altitude"
+      },
+      {
+        "id": "C",
+        "text": "a scientific instrument used to measure depth"
+      },
+      {
+        "id": "D",
+        "text": "a group of organisms living in the same habitat"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage explains that strata are layers in a canyon wall, each containing fossils from a specific time period. The context of 'reading the strata from bottom to top' and 'each layer might contain fossils' confirms that a stratum is a distinct rock layer. 'Stratum' can also refer to a low cloud type (stratus) or a social level, but neither fits the geological context described here.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_002",
+    "type": "mcq",
+    "ccss": "L.5.4a",
+    "difficulty": "easy",
+    "lexile": "860L",
+    "passage_text": "During the first winter at Plymouth Colony, nearly half of the settlers perished from cold and disease. Those who survived owed much to Squanto, a member of the Patuxent people who had learned English during an earlier journey to Europe. Squanto acted as an interpreter, helping the Pilgrims and the Wampanoag leader Massasoit communicate. Beyond translation, he showed the settlers how to plant corn by placing fish in each hole to fertilize the soil. Without his intervention, historians believe the colony would have been abandoned. The following autumn's harvest was plentiful, and the colonists organized a celebration — what many consider the origin of the American Thanksgiving tradition.",
+    "stem": "As used in the passage, the word \"interpreter\" most nearly means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "a person who translates speech between languages"
+      },
+      {
+        "id": "B",
+        "text": "a performer who acts out scenes on a stage"
+      },
+      {
+        "id": "C",
+        "text": "a scientist who analyzes data from experiments"
+      },
+      {
+        "id": "D",
+        "text": "a government official who writes new laws"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage states that Squanto 'acted as an interpreter, helping the Pilgrims and Wampanoag leader Massasoit communicate' — and that he had 'learned English during an earlier journey to Europe.' This context shows interpreter means someone who translates between languages. The other options describe performers, scientists, and lawmakers, none of which match the passage's description of Squanto's role.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_003",
+    "type": "mcq",
+    "ccss": "L.5.4a",
+    "difficulty": "easy",
+    "lexile": "840L",
+    "passage_text": "Photosynthesis is the process by which plants convert sunlight into food. Chlorophyll, the green pigment found in plant cells, is the key agent in this reaction. It absorbs red and blue light from the sun while reflecting green light — which is why most plants appear green to our eyes. Inside specialized structures called chloroplasts, the plant uses light energy to split water molecules and combine carbon dioxide from the air into glucose. This glucose fuels the plant's growth. Oxygen is released as a byproduct. Without this continuous process, the atmosphere would slowly lose the oxygen that nearly all living creatures depend on to survive.",
+    "stem": "As used in the passage, the word \"agent\" most nearly means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "the substance that carries out a specific action or function"
+      },
+      {
+        "id": "B",
+        "text": "a person who represents another person in business dealings"
+      },
+      {
+        "id": "C",
+        "text": "a spy who gathers secret information"
+      },
+      {
+        "id": "D",
+        "text": "a chemical that slows down a reaction"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage calls chlorophyll 'the key agent in this reaction,' then immediately explains that it absorbs light to drive photosynthesis. In this scientific context, 'agent' means the substance responsible for carrying out a process — not a business representative or spy. Option D contradicts the passage, which shows chlorophyll speeding up rather than slowing the reaction.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_004",
+    "type": "mcq",
+    "ccss": "L.5.4a",
+    "difficulty": "easy",
+    "lexile": "870L",
+    "passage_text": "Unlike most mammals, bats navigate in complete darkness using echolocation. The bat emits a series of high-pitched clicks that bounce off nearby objects and return to its large, sensitive ears. By measuring the time between the outgoing click and the returning echo, the bat can calculate the exact distance, size, and even texture of an obstacle. This allows bats to catch insects in mid-flight without using their eyes at all. Scientists were puzzled for centuries about how bats avoided collisions in dark caves. The mystery was resolved only in the twentieth century, when researchers finally had instruments sensitive enough to detect the ultrasonic frequencies bats produce.",
+    "stem": "As used in the passage, the word \"emit\" most nearly means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "to send out or release"
+      },
+      {
+        "id": "B",
+        "text": "to receive and store"
+      },
+      {
+        "id": "C",
+        "text": "to block or absorb"
+      },
+      {
+        "id": "D",
+        "text": "to repeat exactly"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage describes bats producing clicks that 'bounce off objects and return' to the bat's ears — so 'emit' describes the outgoing action of sending sound out. Options B and C describe the opposite direction (receiving/blocking). Option D does not match because the bat is originating the click, not repeating something it heard. Context clues like 'outgoing click' confirm that 'emit' means to send out.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_005",
+    "type": "mcq",
+    "ccss": "L.5.4a",
+    "difficulty": "easy",
+    "lexile": "850L",
+    "passage_text": "Desert plants have evolved remarkable strategies for surviving with very little water. The saguaro cactus, for example, has a pleated trunk that can expand dramatically after a rainstorm, storing hundreds of gallons of water inside its thick tissue. Its waxy outer coating prevents that stored water from evaporating in the dry desert air. The cactus's spines, which are actually modified leaves, create a small zone of shade that reduces the temperature of the plant's surface. Shallow but wide-spreading roots allow the plant to collect rain quickly before it soaks into the soil. These adaptations collectively allow the saguaro to thrive where most other plants would quickly perish.",
+    "stem": "As used in the passage, the word \"modified\" most nearly means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "changed in form for a different purpose"
+      },
+      {
+        "id": "B",
+        "text": "removed completely and replaced"
+      },
+      {
+        "id": "C",
+        "text": "identified and labeled by scientists"
+      },
+      {
+        "id": "D",
+        "text": "hidden beneath the surface"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage says spines 'are actually modified leaves,' and the surrounding context explains they provide shade — a different function from a typical leaf's role in photosynthesis. 'Modified' here means structurally changed to serve a new purpose. Option B goes too far (they are still leaf-derived, not replaced). Options C and D have no support in the passage.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_006",
+    "type": "mcq",
+    "ccss": "L.5.5a",
+    "difficulty": "medium",
+    "lexile": "890L",
+    "passage_text": "Maya had always been the most cautious player on the chess team. She never moved a piece without first mapping out three or four possible responses from her opponent. At the regional tournament, however, she faced a girl named Priya who moved with breathtaking speed, barely glancing at the board before placing each piece. During a crucial match in the semifinal, Priya's rook swept across the board and took Maya's queen. The coach leaned over and whispered, 'She just pulled the rug out from under you. Now dig in.' Maya stared at the board for thirty full seconds, then allowed herself a small smile. She had prepared for exactly this kind of trap.",
+    "stem": "When the coach says Priya 'pulled the rug out from under' Maya, the coach means that Priya —",
+    "options": [
+      {
+        "id": "A",
+        "text": "suddenly removed Maya's advantage, leaving her off-balance"
+      },
+      {
+        "id": "B",
+        "text": "physically moved a rug that Maya was standing on"
+      },
+      {
+        "id": "C",
+        "text": "quietly gave Maya a warning about the next move"
+      },
+      {
+        "id": "D",
+        "text": "helped Maya find a hidden weakness in her strategy"
+      }
+    ],
+    "key": "A",
+    "feedback": "\"Pulled the rug out from under\" is an idiom meaning to suddenly take away someone's support or advantage. In this context, Priya's unexpected capture of Maya's queen destabilized Maya's position — she lost her most powerful piece without warning. Option B is the literal (non-idiomatic) reading, which doesn't fit a chess match. Options C and D contradict the passage, which describes the move as damaging to Maya, not helpful.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_007",
+    "type": "mcq",
+    "ccss": "L.5.5a",
+    "difficulty": "medium",
+    "lexile": "900L",
+    "passage_text": "The new school principal, Dr. Okafor, arrived in September with a reputation for turning around struggling programs. At the first faculty meeting, she laid out her plan with calm precision. Some teachers exchanged doubtful glances, remembering all the reforms that had come and gone without lasting change. Mr. Reyes, who had taught at the school for twenty-two years, leaned toward a colleague and muttered, 'I'll believe it when I see it. These plans always look good on paper.' By December, however, the hallways felt different — quieter, more purposeful. Mr. Reyes found himself staying late to redesign his lesson plans, something he hadn't done in years. He was, as he later admitted, eating his words.",
+    "stem": "When Mr. Reyes says he was 'eating his words,' he means that he —",
+    "options": [
+      {
+        "id": "A",
+        "text": "was being forced to take back a prediction that turned out to be wrong"
+      },
+      {
+        "id": "B",
+        "text": "was refusing to speak at the faculty meeting"
+      },
+      {
+        "id": "C",
+        "text": "was memorizing a speech he planned to give later"
+      },
+      {
+        "id": "D",
+        "text": "was whispering so that others could not hear him"
+      }
+    ],
+    "key": "A",
+    "feedback": "\"Eating your words\" is an idiom meaning to admit you were wrong about something you said. Mr. Reyes had predicted the plan wouldn't work ('I'll believe it when I see it'), but the December improvements proved him wrong — so he had to take back his earlier skepticism. Options B, C, and D all describe literal actions involving speech, missing the figurative meaning the phrase carries in this context.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_008",
+    "type": "mcq",
+    "ccss": "L.5.5a",
+    "difficulty": "medium",
+    "lexile": "880L",
+    "passage_text": "The river had been rising steadily since Monday, and by Thursday the sandbagging crews were exhausted. National Guard volunteers worked shoulder to shoulder with local farmers, stacking bags in the grey pre-dawn light. The town's emergency manager, Diane Chu, had not slept in forty hours. A reporter stopped her at the barrier and asked whether the levee would hold. Chu looked out at the swollen river, then back at the reporter. 'We're building this plane while we're flying it,' she said, and turned back toward the work. The reporter wrote the phrase down and stared at it, trying to understand what she meant.",
+    "stem": "When Diane Chu says 'we're building this plane while we're flying it,' she most likely means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "the team is solving problems and making decisions at the same time the crisis is happening"
+      },
+      {
+        "id": "B",
+        "text": "the rescue operation is being conducted from an aircraft"
+      },
+      {
+        "id": "C",
+        "text": "the engineers are constructing a new kind of flood barrier shaped like a plane"
+      },
+      {
+        "id": "D",
+        "text": "the situation is moving so quickly that there is no longer any danger"
+      }
+    ],
+    "key": "A",
+    "feedback": "This is a figurative expression meaning you are creating or figuring out a solution at the same time you are already in the middle of executing it — there is no time to plan fully before acting. The passage context (sleepless emergency manager, ongoing flood response, no clear plan) supports this meaning. Options B and C take the airplane image literally, which does not fit the situation. Option D contradicts the passage's tone of exhaustion and uncertainty.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_009",
+    "type": "mcq",
+    "ccss": "L.5.5a",
+    "difficulty": "medium",
+    "lexile": "870L",
+    "passage_text": "Amara had wanted to join the robotics club since sixth grade, but the older members had always seemed like a wall of expertise she couldn't scale. When she finally submitted her application in the fall, the club president, Jin, reviewed her design portfolio and raised an eyebrow. 'These sketches are rough,' he said, 'but there's something here.' He handed back the folder. 'You're a diamond in the rough.' Over the next three months, Jin paired Amara with a senior mentor. By the spring competition, her robot — a graceful, nimble creation — won the award for most innovative design. Jin watched from the sidelines, nodding slowly.",
+    "stem": "When Jin calls Amara 'a diamond in the rough,' he means that she —",
+    "options": [
+      {
+        "id": "A",
+        "text": "has real potential that has not yet been fully developed"
+      },
+      {
+        "id": "B",
+        "text": "is too polished and confident for a beginner"
+      },
+      {
+        "id": "C",
+        "text": "lacks the basic skills to succeed in the competition"
+      },
+      {
+        "id": "D",
+        "text": "has already won a previous robotics award"
+      }
+    ],
+    "key": "A",
+    "feedback": "A 'diamond in the rough' is an idiom for someone with great natural talent that has not yet been refined. Jin acknowledges Amara's sketches are 'rough' but says 'there's something here' — then invests in her development. By spring she wins an innovation award, confirming the idiom's meaning. Options B and D contradict the passage; option C is disproved by her eventual success.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_010",
+    "type": "mcq",
+    "ccss": "L.5.4b",
+    "difficulty": "medium",
+    "lexile": "910L",
+    "passage_text": "Astronomers study the universe using a variety of telescopes, each designed to capture a different part of the electromagnetic spectrum. A standard optical telescope collects visible light, while a radio telescope detects radio waves invisible to the naked eye. The Hubble Space Telescope orbits Earth at a distance of about 340 miles, allowing it to capture images without interference from our atmosphere. Its successor, the James Webb Space Telescope, carries an infrared camera capable of detecting heat signatures from galaxies that formed more than thirteen billion years ago. Astronomers describe Webb's observations as a form of 'time travel,' since light traveling that distance takes billions of years to reach us.",
+    "stem": "The word \"infrared\" contains the Latin prefix \"infra-\", which means \"below\" or \"beneath.\" Based on this and the passage, infrared light is most likely —",
+    "options": [
+      {
+        "id": "A",
+        "text": "light with wavelengths just below the red end of the visible spectrum"
+      },
+      {
+        "id": "B",
+        "text": "light that is brighter than any color humans can see"
+      },
+      {
+        "id": "C",
+        "text": "light produced only by man-made devices in space"
+      },
+      {
+        "id": "D",
+        "text": "light that travels faster than ordinary visible light"
+      }
+    ],
+    "key": "A",
+    "feedback": "The prefix 'infra-' means 'below' or 'beneath.' Combined with 'red' (the lowest-frequency color visible to humans), infrared means light that falls just below the red end of the visible spectrum — which matches the passage's description of it as something a camera detects that is 'invisible to the naked eye' (like radio waves) yet carries heat signatures. Options B, C, and D are not supported by the prefix meaning or the passage context.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_011",
+    "type": "mcq",
+    "ccss": "L.5.4b",
+    "difficulty": "hard",
+    "lexile": "950L",
+    "passage_text": "Epidemiologists track the spread of infectious diseases across populations, searching for patterns that reveal how and why outbreaks begin. Unlike clinicians who treat individual patients, epidemiologists analyze data from thousands of cases to identify risk factors, transmission routes, and the populations most vulnerable to infection. During the investigation of a cholera outbreak in a nineteenth-century London neighborhood, physician John Snow mapped each case to a specific water pump. By demonstrating that cases clustered around a single contaminated source, Snow provided one of the earliest examples of epidemiological method. His work laid the groundwork for the modern understanding that disease follows predictable, traceable pathways through communities.",
+    "stem": "The word \"epidemiologist\" contains the Greek root \"demos,\" meaning \"people\" or \"population.\" Based on this and the passage, an epidemiologist is most accurately described as —",
+    "options": [
+      {
+        "id": "A",
+        "text": "a scientist who studies how diseases spread through populations"
+      },
+      {
+        "id": "B",
+        "text": "a doctor who develops vaccines for individual patients"
+      },
+      {
+        "id": "C",
+        "text": "a government official who enforces public health laws"
+      },
+      {
+        "id": "D",
+        "text": "a laboratory researcher who identifies new bacteria"
+      }
+    ],
+    "key": "A",
+    "feedback": "The Greek root 'demos' means 'people' or 'population,' which matches the passage's description: epidemiologists 'analyze data from thousands of cases' to find patterns across communities — not individual patients. The passage explicitly contrasts epidemiologists with 'clinicians who treat individual patients,' ruling out option B. Options C and D describe roles not supported by the passage or by the root 'demos.'",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_012",
+    "type": "mcq",
+    "ccss": "L.5.4b",
+    "difficulty": "hard",
+    "lexile": "960L",
+    "passage_text": "In architectural history, buildings designed to withstand extremely high temperatures are said to be constructed with refractory materials. Blast furnaces, glass-melting kilns, and rocket nozzles all rely on refractory linings — substances that resist softening or breaking down even at temperatures exceeding two thousand degrees Celsius. Common refractory materials include certain ceramics, alumina, and zirconia. Engineers must balance a material's heat resistance with its weight and cost, since adding extra layers of refractory lining makes a structure heavier and more expensive to build. Selecting the correct refractory composition is therefore as much an economic decision as it is a materials science challenge.",
+    "stem": "The word \"refractory\" contains the Latin prefix \"re-\" (again, back) and root \"fract\" (to break). Based on this and the passage, a refractory material most likely —",
+    "options": [
+      {
+        "id": "A",
+        "text": "resists breaking down even under extreme conditions"
+      },
+      {
+        "id": "B",
+        "text": "breaks apart and reforms repeatedly when heated"
+      },
+      {
+        "id": "C",
+        "text": "reflects light rather than absorbing heat"
+      },
+      {
+        "id": "D",
+        "text": "requires frequent replacement when used in furnaces"
+      }
+    ],
+    "key": "A",
+    "feedback": "The root 'fract' means 'to break,' and the prefix 're-' here functions to mean 'against' or 'back' (as in 'refract' = bend back). Combined, 'refractory' describes something that pushes back against breaking — resisting breakdown. The passage confirms this: refractory materials 'resist softening or breaking down' at extreme temperatures. Option B describes the opposite behavior. Options C and D are not supported by either the root or the passage.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_013",
+    "type": "mcq",
+    "ccss": "L.5.5c",
+    "difficulty": "hard",
+    "lexile": "940L",
+    "passage_text": "The two candidates had very different ways of speaking to voters. Candidate Alvarez delivered her proposals in a steady, measured voice, presenting each point with data and citing specific sources. She called her approach 'evidence-based.' Candidate Moreau, by contrast, arrived at each rally with energy that seemed to fill the room. He called his policies 'bold.' Reporters who covered both campaigns noticed that Alvarez's supporters described her as 'deliberate,' while Moreau's supporters used the same quality in Alvarez — her careful pace — to call her 'hesitant.' Meanwhile, Moreau's critics used his boldness to label him 'reckless.' The same behavior, one observer noted, is described very differently depending on who is doing the describing.",
+    "stem": "Based on the passage, the words \"deliberate\" and \"hesitant\" are used to describe the same quality in Candidate Alvarez. What is the most important difference between these two words?",
+    "options": [
+      {
+        "id": "A",
+        "text": "\"Deliberate\" suggests her careful pace is a strength; \"hesitant\" suggests it is a weakness"
+      },
+      {
+        "id": "B",
+        "text": "\"Deliberate\" refers to speed; \"hesitant\" refers to the loudness of her voice"
+      },
+      {
+        "id": "C",
+        "text": "\"Deliberate\" is used by her opponents; \"hesitant\" is used by her supporters"
+      },
+      {
+        "id": "D",
+        "text": "\"Deliberate\" and \"hesitant\" mean exactly the same thing in this passage"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage shows that Alvarez's supporters call her 'deliberate' (implying her carefulness is purposeful and positive), while her critics use the same slow pace to call her 'hesitant' (implying it is a negative, indecisive trait). This is a classic example of connotation — two words can describe the same observable behavior with opposite emotional overtones. Option C gets the speaker groups reversed. Option D ignores the connotative difference the passage explicitly highlights.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_014",
+    "type": "mcq",
+    "ccss": "L.5.5c",
+    "difficulty": "hard",
+    "lexile": "930L",
+    "passage_text": "On the last day of summer, Eli packed the few things he wanted to keep into a single cardboard box. His family had lived in this house for nine years. He sat on the empty floor of what had been his room, listening to sounds he had never noticed before: the creak of the second step on the stairs, a faint ticking from the furnace pipes. His mother appeared in the doorway. 'Ready?' she asked. Eli looked around one last time. He thought of the word 'empty' and then thought of a better word: 'hollow.' The room wasn't just without furniture. It felt like it had once held something that could not be packed.",
+    "stem": "Eli chooses the word \"hollow\" instead of \"empty\" to describe the room. What does this choice reveal about the difference in connotation between these two words?",
+    "options": [
+      {
+        "id": "A",
+        "text": "\"Hollow\" carries a sense of emotional loss that \"empty\" does not"
+      },
+      {
+        "id": "B",
+        "text": "\"Hollow\" means a room has no windows, while \"empty\" means it has no furniture"
+      },
+      {
+        "id": "C",
+        "text": "\"Hollow\" is a more precise measurement of the room's size than \"empty\""
+      },
+      {
+        "id": "D",
+        "text": "\"Hollow\" and \"empty\" are used interchangeably throughout the passage"
+      }
+    ],
+    "key": "A",
+    "feedback": "Eli explicitly rejects 'empty' in favor of 'hollow,' and the passage explains why: 'It felt like it had once held something that could not be packed.' Both words describe a space without objects, but 'hollow' carries the connotation of an absence that feels deeper — something essential is missing. This is a connotation distinction (L.5.5c). Options B and C invent literal distinctions the passage does not support. Option D contradicts the passage, which treats the two words as meaningfully different.",
+    "humanApproved": false
+  },
+  {
+    "id": "L5_vocab_015",
+    "type": "mcq",
+    "ccss": "L.5.4a",
+    "difficulty": "hard",
+    "lexile": "1000L",
+    "passage_text": "Classical economists argued that markets are self-correcting: when prices rise too high, demand falls, which drives prices back down. This model assumes that buyers and sellers have access to the same information and make rational decisions. Behavioral economists have challenged this view, arguing that human decision-making is subject to systematic biases. One such bias is 'anchoring' — the tendency to rely too heavily on the first piece of information encountered. In a study of real estate prices, for example, participants consistently adjusted their estimates based on a randomly assigned listing price, even after being told the number was meaningless. The anchoring effect demonstrates that the market's capacity for rational self-correction may be more limited than classical theory suggests.",
+    "stem": "As used in the passage, the word \"anchoring\" most nearly means —",
+    "options": [
+      {
+        "id": "A",
+        "text": "over-weighting an initial reference point when making later judgments"
+      },
+      {
+        "id": "B",
+        "text": "the process of securing a ship in place so it cannot drift"
+      },
+      {
+        "id": "C",
+        "text": "using detailed research to arrive at a stable, accurate estimate"
+      },
+      {
+        "id": "D",
+        "text": "the tendency to avoid making any decisions under pressure"
+      }
+    ],
+    "key": "A",
+    "feedback": "The passage defines anchoring directly: it is 'the tendency to rely too heavily on the first piece of information encountered.' The real estate study confirms this — participants were influenced by a randomly assigned (meaningless) number, demonstrating that an initial value skews later judgment. Option B is the nautical/literal meaning of 'anchor,' which does not fit the behavioral economics context. Option C describes the opposite behavior (careful research toward accuracy). Option D describes decision avoidance, which the passage does not mention.",
+    "humanApproved": false
+  }
+]

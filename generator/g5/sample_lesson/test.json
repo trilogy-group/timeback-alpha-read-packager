@@ -1,0 +1,258 @@
+{
+  "_dry_run": true,
+  "_note": "LOCAL ONLY. Not posted. item_base is a deliberately-invalid host. Live OneRoster/QTI wiring is proven separately by deploy_cc_extra.py.",
+  "_passage": {
+    "id": "g5-info-beavers",
+    "title": "The Engineers of the Wetland",
+    "genre": "informational",
+    "lexile": "905L"
+  },
+  "test": {
+    "identifier": "g5dry-g5-info-beavers-test",
+    "title": "G5 dry-run — The Engineers of the Wetland",
+    "qti-test-part": [
+      {
+        "identifier": "tp0",
+        "navigationMode": "linear",
+        "submissionMode": "individual",
+        "qti-assessment-section": [
+          {
+            "identifier": "s0",
+            "title": "items",
+            "visible": true,
+            "required": true,
+            "fixed": false,
+            "sequence": 1,
+            "qti-assessment-item-ref": [
+              {
+                "identifier": "g5dry-g5-info-beavers-00-mcq",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-00-mcq"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-01-mcq",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-01-mcq"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-02-msq",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-02-msq"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-03-msq",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-03-msq"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-04-hot-text",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-04-hot-text"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-05-hot-text",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-05-hot-text"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-06-ebsr",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-06-ebsr"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-07-ebsr",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-07-ebsr"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-08-sequence",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-08-sequence"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-09-sequence",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-09-sequence"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-10-match",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-10-match"
+              },
+              {
+                "identifier": "g5dry-g5-info-beavers-11-match",
+                "href": "https://LOCAL-DRYRUN.invalid/qti/v3p0/assessment-items/g5dry-g5-info-beavers-11-match"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "qti-outcome-declaration": [
+      {
+        "identifier": "SCORE",
+        "cardinality": "single",
+        "baseType": "float"
+      }
+    ]
+  },
+  "item_metadata": {
+    "g5dry-g5-info-beavers-00-mcq": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "medium",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.1"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-01-mcq": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "medium",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.4"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-02-msq": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "hard",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-03-msq": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "hard",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.2"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-04-hot-text": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "hard",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.1"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-05-hot-text": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "medium",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-06-ebsr": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "easy",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.1"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-07-ebsr": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "easy",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-08-sequence": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "medium",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-09-sequence": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "medium",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-10-match": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "hard",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    },
+    "g5dry-g5-info-beavers-11-match": {
+      "subject": "Reading",
+      "grade": "5",
+      "difficulty": "hard",
+      "humanApproved": false,
+      "learningObjectiveSet": [
+        {
+          "source": "CASE",
+          "learningObjectiveIds": [
+            "RI.5.3"
+          ]
+        }
+      ]
+    }
+  }
+}
