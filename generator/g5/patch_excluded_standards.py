@@ -211,10 +211,13 @@ def _ebsr_xml(iid, d):
     a_part, b_part = d["part_a"], d["part_b"]
     body = NS.format(iid=iid, title="EBSR")
     for rid, part in (("RESPONSE_1", a_part), ("RESPONSE_2", b_part)):
+        answer_key = part.get("answer") or next(
+            (o["key"] for o in part.get("answer_options", []) if o.get("is_correct")), None
+        )
         body += (
             '  <qti-response-declaration identifier="%s" cardinality="single" base-type="identifier">\n'
             '    <qti-correct-response><qti-value>%s</qti-value></qti-correct-response>\n'
-            '  </qti-response-declaration>\n' % (rid, escape(part["answer"]))
+            '  </qti-response-declaration>\n' % (rid, escape(answer_key))
         )
     body += (
         '  <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" '
@@ -243,6 +246,9 @@ def _ebsr_xml(iid, d):
     body += '  </qti-item-body>\n'
     body += '  <qti-response-processing>\n'
     for rid, part, sc in (("RESPONSE_1", a_part, "SCORE_1"), ("RESPONSE_2", b_part, "SCORE_2")):
+        answer_key = part.get("answer") or next(
+            (o["key"] for o in part.get("answer_options", []) if o.get("is_correct")), None
+        )
         body += (
             '    <qti-response-condition><qti-response-if>\n'
             '      <qti-match><qti-variable identifier="%s"/>'
@@ -250,7 +256,7 @@ def _ebsr_xml(iid, d):
             '      <qti-set-outcome-value identifier="%s">'
             '<qti-base-value base-type="float">1</qti-base-value></qti-set-outcome-value>\n'
             '    </qti-response-if></qti-response-condition>\n'
-        ) % (rid, escape(part["answer"]), sc)
+        ) % (rid, escape(answer_key), sc)
     body += (
         '    <qti-set-outcome-value identifier="SCORE">'
         '<qti-sum><qti-variable identifier="SCORE_1"/>'

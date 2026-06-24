@@ -326,7 +326,7 @@ def _make_item_row(certified_row, env_data, orig_row=None):
     try:
         payload = expander(certified_row, orig_row)
     except Exception as e:
-        sys.stderr.write(f"WARN: expand {item_type} id={certified_row.get('id','?')}: {e}\n")
+        sys.stderr.write(f"WARN: expand {item_type} id={certified_row.get('id') or certified_row.get('item_id','?')}: {e}\n")
         return None
 
     row = _make_envelope(env_data)
@@ -344,7 +344,8 @@ def _make_item_row(certified_row, env_data, orig_row=None):
     row.update(payload)
 
     # Keep the adapted item's own id for traceability
-    row["item_id"] = certified_row.get("id", "")
+    # Support both 'id' (certify_pipeline output) and 'item_id' (replacement schema)
+    row["item_id"] = certified_row.get("id", "") or certified_row.get("item_id", "")
 
     return row
 
@@ -398,9 +399,13 @@ def convert(passing_path, passage_map_path, output_path,
 
     unmatched = 0
     for row in certified:
-        item_id = row.get("id", "")
+        # Support both 'id' (certify_pipeline output) and 'item_id' (replacement schema)
+        item_id = row.get("id", "") or row.get("item_id", "")
         passage_text = row.get("passage_text", "")
         env = lookup(item_id, passage_text)
+        # Fallback: if lookup by 'id' missed, try 'item_id' explicitly
+        if env is None and row.get("item_id") and row.get("item_id") != item_id:
+            env = lookup(row["item_id"], passage_text)
         if env is None:
             unmatched += 1
             # Use a fallback "orphan" lesson
@@ -468,7 +473,7 @@ def convert(passing_path, passage_map_path, output_path,
             # 2. Emit item rows (up to 10 per lesson per spec)
             items_for_lesson = lesson_items[key][:10]
             for certified_row in items_for_lesson:
-                item_id = certified_row.get("id", "")
+                item_id = certified_row.get("id", "") or certified_row.get("item_id", "")
                 orig_row = orig_by_id.get(item_id) if orig_by_id else None
                 item_row = _make_item_row(certified_row, env, orig_row)
                 if item_row is None:
