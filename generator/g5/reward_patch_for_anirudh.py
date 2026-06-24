@@ -63,6 +63,20 @@ CURRICULUM_TOPIC_FINGERPRINTS = [
     r'\bphotosynthes\w+\b', r'\bcellular respiration\b',
     r'\bsolar system\b', r'\bgravit\w+ (pull|force|field)\b',
     r'\belectromagneti\w+\b', r'\bphotosynthes\w+\b',
+    # Curriculum process paraphrases — common rewordings that escape exact-term matching
+    r'\bconvert(s)?\s+sunlight\b', r'\btectonic\s+plate', r'\bwater\s+evaporat',
+    r'\brelease(s)?\s+oxygen\b', r'\bgravitational\s+(pull|force|field)\b',
+    r'\bnatural\s+selection\b', r'\bsurvival\s+of\s+the\s+fittest\b',
+    r'\bgene(tic)?\s+expression\b', r'\bmeiosis\b', r'\bmitosis\b',
+    r'\bchloroplast\b', r'\bcell\s+(wall|membrane|nucleus)\b',
+    # Standalone famous surnames — catch partial references that escape full-name patterns
+    r'\bCurie\b', r'\bDarwin\b', r'\bNewton\b', r'\bEinstein\b',
+    r'\bFranklin\b', r'\bJefferson\b', r'\bLincoln\b', r'\bWashington\b',
+    r'\bArmstrong\b', r'\bTubman\b', r'\bParks\b', r'\bEarhart\b',
+    # Famous-event aftermath / consequence terms
+    r'\b(eruption|lava\s+flow|ash\s+cloud|tectonic\s+shift)\b',
+    r'\b(Underground\s+Railroad|abolition(ist)?)\b',
+    r'\b(Reconstruction|Emancipation)\b',
 ]
 
 def passage_curriculum_penalty(passage_text: str) -> float:
@@ -85,8 +99,19 @@ def passage_curriculum_penalty(passage_text: str) -> float:
 COLD_PASSAGE_SIGNALS = [
     # Specific measurements (not famous constants)
     r'\b\d+\.?\d*\s*(percent|%|degrees[CF]|km|kilometers|meters|grams|kg|liters)\b',
-    # Named but non-famous individuals (FirstName LastName pattern not in famous-person list)
-    r'\b[A-Z][a-z]+ [A-Z][a-z]+\b',
+    # Named but non-famous individuals — tighter FirstName LastName pattern.
+    # Excludes: month names as first word, directional/place-prefix words (North, South, East,
+    # West, New, Upper, Lower, Fort, Port, San, Santa, Saint, St) as first word, and last words
+    # that are common place suffixes (City, Town, Lake, River, Bay, Park, Island, Mountain,
+    # Valley, County, Street, Avenue, Road) or major brand names (Apple, Google, Amazon, Ford).
+    # Uses a negative-lookahead on the first token and a negative-lookbehind-equivalent check
+    # by excluding known non-person second tokens via alternation on the second word.
+    r'\b(?!(?:January|February|March|April|May|June|July|August|September|October|November|December|'
+    r'North|South|East|West|New|Upper|Lower|Fort|Port|San|Santa|Saint|St)\b)'
+    r'[A-Z][a-z]{2,}\s'
+    r'(?!(?:City|Town|Lake|River|Bay|Park|Island|Mountain|Mountains|Valley|County|Street|Avenue|Road|Boulevard|Drive|'
+    r'Apple|Google|Amazon|Ford|Nike|Tesla|University|College|School|Hospital|Museum|Airport|Stadium)\b)'
+    r'[A-Z][a-z]{2,}\b',
     # Character decision / reversal language
     r'\b(decided|hesitated|reconsidered|doubted|changed her mind|changed his mind|reversed course|reversed her|reversed his)\b',
     # Argument-stance language
