@@ -163,12 +163,29 @@ def with_stimulus_ref(item_xml, stim_id):
     return item_xml.replace('  <qti-item-body>\n', ref + '  <qti-item-body>\n', 1)
 
 
+def _md_inline(t):
+    """Lift inline markdown on already-escaped text: **bold**, *em*."""
+    t = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', t)
+    t = re.sub(r'(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', t)
+    return t
+
+
+def _fix_void(s):
+    """Replace, don't kill: bare void tags (<br>, <hr>) carry real structure (verse line breaks)
+    but are invalid XML — self-close them so the break survives well-formed."""
+    s = re.sub(r'<\s*br\s*/?\s*>', '<br/>', s, flags=re.I)
+    s = re.sub(r'<\s*hr\s*/?\s*>', '<hr/>', s, flags=re.I)
+    return s
+
+
 def _txt_to_html(txt, title=None):
-    """Structure-preserving passage renderer — delegates to the shared arpack.passage_html_div.
-    This replaced a naive flattener that split on EVERY newline and escaped everything, collapsing a
-    structured passage into one tagless run-on <p> (titles welded onto bodies, tables flattened). Now
-    HTML is preserved verbatim and markdown/plain text splits on BLANK LINES only with soft-wrap
-    joining + pipe-tables. Same renderer as publish_powerpath_g5.py — one source of truth."""
+    """Structure-PRESERVING passage renderer — delegates to the shared arpack.passage_html_div so a
+    FRESH publish emits well-blocked passages directly (the same renderer restore_stimuli.py uses to
+    repair already-live content). The local flattener this replaced split on EVERY newline and
+    escaped everything, collapsing structured input into one tagless <p> — titles welded onto bodies,
+    passages run together, tables flattened. Now: HTML is preserved verbatim (void tags repaired);
+    markdown / plain text splits on BLANK LINES only with soft-wrap joining + pipe-tables. One
+    renderer, both publishers (G3 + G5), no divergence."""
     return arpack.passage_html_div(txt, title)
 
 
@@ -225,7 +242,7 @@ def build_plan(a):
 
     PRE = a.prefix
     course = {"sourcedId": PRE, "status": "active", "title": a.title, "courseCode": PRE,
-              "grades": ["3"], "subjects": ["Reading"], "org": {"sourcedId": a.org},
+              "grades": ["5"], "subjects": ["Reading"], "org": {"sourcedId": a.org},
               "metadata": {"primaryApp": "timeback", "lessonType": "powerpath-100"}}
 
     units, lessons, lesson_blocks = [], [], []
@@ -304,8 +321,8 @@ def test_json(test_id, title, item_ids, item_base):
 
 
 def _parse_mastery(v):
-    """'90' -> 90 (stamp the gate); '0'/'none'/'off'/'' -> None (omit, gate disabled). Live sources
-    shipped masteryThreshold:null, so the mastery gate was silently OFF — default to 90."""
+    """'90' -> 90 (stamp the gate); '0'/'none'/'off'/'' -> None (omit, gate disabled). Both live G5
+    sources shipped masteryThreshold:null, so the mastery gate was silently OFF — default to 90."""
     s = str(v if v is not None else "").strip().lower()
     if s in ("", "0", "none", "off", "null", "disable", "disabled"):
         return None
@@ -340,8 +357,9 @@ def main():
     plan = build_plan(a)
 
     # ── fold 3: build-time kid-facing-title guard ──────────────────────────────────────────────
-    # QA/cert jargon, question stems, and structural labels must never reach a learner title. Runs
-    # in BOTH dry-run and publish so a leaky title fails fast offline. --lenient-titles -> warn-only.
+    # QA/cert jargon, question stems, and structural labels must never reach a learner title (the
+    # live-UI regression this packager was hardened against). Runs in BOTH dry-run and publish so a
+    # leaky title fails fast offline. --lenient-titles downgrades to warn-only for intermediate runs.
     _title_violations = []
     for _scope, _objs in (("unit", plan["units"]), ("lesson", plan["lessons"])):
         for _o in _objs:
@@ -357,7 +375,6 @@ def main():
             raise SystemExit("title guard failed (%d); fix titles or pass --lenient-titles"
                              % len(_title_violations))
         print("  (--lenient-titles: continuing despite violations)")
-
     nb = plan["blocks"]
     nitems = sum(len(b["items"]) for b in nb)
     print("=" * 78)
@@ -430,7 +447,7 @@ def main():
                 "sourcedId": TID, "status": "active", "title": b["title"], "importance": "primary",
                 "vendorResourceId": TID,
                 "metadata": {"type": "qti", "subType": "qti-test", "lessonType": "powerpath-100",
-                             "xp": 20, "subject": "Reading", "grade": "3",
+                             "xp": 20, "subject": "Reading", "grade": "5",
                              "url": QTI + "/assessment-tests/" + TID,
                              **({"masteryThreshold": _MT} if _MT is not None else {})}}},
                 "res:" + TID, tok, state, a.checkpoint)
@@ -458,7 +475,7 @@ def main():
                     "parentAssessmentLineItem": {"sourcedId": b["parent_ali"]},
                     "course": {"sourcedId": a.prefix},
                     "resultValueMin": 0, "resultValueMax": 1,
-                    "metadata": {"questionId": c["questionId"], "lessonType": "powerpath-100", "grade": "3"}}},
+                    "metadata": {"questionId": c["questionId"], "lessonType": "powerpath-100", "grade": "5"}}},
                     "cali:" + c["sourcedId"], tok, state, a.checkpoint)
 
     if a.enroll_student:
@@ -469,7 +486,7 @@ def main():
             "org": {"sourcedId": a.org}}}, "term:" + TERM, tok, state, a.checkpoint)
         P.post(OR + "/rostering/v1p2/classes", {"class": {
             "sourcedId": CLASS, "status": "active", "title": a.title, "classCode": CLASS,
-            "classType": "scheduled", "grades": ["3"], "subjects": ["Reading"],
+            "classType": "scheduled", "grades": ["5"], "subjects": ["Reading"],
             "course": {"sourcedId": a.prefix}, "org": {"sourcedId": a.org},
             "school": {"sourcedId": a.org}, "terms": [{"sourcedId": TERM}]}},
             "class:" + CLASS, tok, state, a.checkpoint)
