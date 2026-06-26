@@ -1,0 +1,369 @@
+[
+  {
+    "skill": "RI.5.9",
+    "type": "mcq",
+    "difficulty": "medium",
+    "ccss": "RI.5.9",
+    "stem": "Both authors describe how Yenvale got its water, but they treat the same arrangement very differently. How do the two accounts MOST differ on this point?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Okafor presents the shared aqueduct with pride, while Delacroix presents it as a source of bitter resentment."
+      },
+      {
+        "id": "b",
+        "text": "Okafor claims the aqueduct failed within a single year, while Delacroix claims it served the town for many generations."
+      },
+      {
+        "id": "c",
+        "text": "Okafor says that only the wealthiest families were ever permitted to draw from the aqueduct, while Delacroix says all shared it."
+      },
+      {
+        "id": "d",
+        "text": "Okafor describes their water as a wide natural river, while Delacroix describes a built system of carved stone channels."
+      }
+    ],
+    "key": "a",
+    "feedback": "Okafor calls the aqueduct 'our proudest achievement, built by every household together,' framing it positively. Delacroix calls the same structure 'a constant quarrel,' noting 'each family accused the next of taking more than its fair share.' The contrast is one of attitude toward the shared water, not failure versus success (B), wealth (C), or river versus channel (D) — both accounts agree it was a shared aqueduct.",
+    "passage_text": "When the historian Okafor wrote of Yenvale, she wrote with love. The aqueduct, she said, was \"our proudest achievement, built by every household together.\" Each spring the river overran its banks and left behind the rich silt that fed the fields, and she insisted cooperation had been the settlement's true foundation. The magistrate Delacroix, who never lived there, judged it differently. Reading the dusty council records generations later, he concluded that Yenvale survived only through the steady hand of the magistrate, not neighborly goodwill. The aqueduct, he wrote, was a constant quarrel, for each family accused the next of taking more than its fair share, and the same spring waters could carry off a year of stored grain in one night. On the end they agreed on nothing: Okafor believed the silt that fed the fields at last choked the channels no one could clear, while Delacroix recorded that, family by family, the people left, worn out by quarrels no magistrate could settle.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.9",
+    "type": "mcq",
+    "difficulty": "hard",
+    "ccss": "RI.5.9",
+    "stem": "The two accounts agree on one fact but draw opposite conclusions from it. Which fact do BOTH authors report while interpreting it in contradictory ways?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The spring flood — Okafor calls it a blessing, Delacroix calls it a yearly threat."
+      },
+      {
+        "id": "b",
+        "text": "The sunrise council meeting — both authors plainly consider this habit admirable."
+      },
+      {
+        "id": "c",
+        "text": "The founding by traders — only Delacroix mentions it; Okafor never names a founder."
+      },
+      {
+        "id": "d",
+        "text": "The unusually mild winters — a detail that neither author chooses to record at all."
+      },
+      {
+        "id": "e",
+        "text": "The children leaving as adults — only Okafor laments this loss to the valley."
+      }
+    ],
+    "key": "a",
+    "feedback": "Both authors record the spring flood. Okafor writes that each spring 'the river overran its banks and left behind the rich silt that fed the fields' — a blessing. Delacroix writes that 'the same spring waters could carry off a year of stored grain in one night' — a threat. The other options either appear in only one account or in neither, so they cannot be a shared fact read two ways.",
+    "passage_text": "When the historian Okafor wrote of Yenvale, she wrote with love. The aqueduct, she said, was \"our proudest achievement, built by every household together.\" Each spring the river overran its banks and left behind the rich silt that fed the fields, and she insisted cooperation had been the settlement's true foundation. The magistrate Delacroix, who never lived there, judged it differently. Reading the dusty council records generations later, he concluded that Yenvale survived only through the steady hand of the magistrate, not neighborly goodwill. The aqueduct, he wrote, was a constant quarrel, for each family accused the next of taking more than its fair share, and the same spring waters could carry off a year of stored grain in one night. On the end they agreed on nothing: Okafor believed the silt that fed the fields at last choked the channels no one could clear, while Delacroix recorded that, family by family, the people left, worn out by quarrels no magistrate could settle.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.9",
+    "type": "msq",
+    "difficulty": "hard",
+    "ccss": "RI.5.9",
+    "stem": "Select the TWO statements that accurately describe a difference between how Okafor and Delacroix portray Yenvale. Choose exactly two.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Okafor credits survival to cooperation among households, while Delacroix credits a single firm leader."
+      },
+      {
+        "id": "b",
+        "text": "Okafor remembers the place warmly from within, while Delacroix observes it as an outsider reading records."
+      },
+      {
+        "id": "c",
+        "text": "Both authors agree the settlement was eventually abandoned because of a long and destructive war."
+      },
+      {
+        "id": "d",
+        "text": "Okafor describes the aqueduct as carved stone, while Delacroix flatly denies any aqueduct existed."
+      },
+      {
+        "id": "e",
+        "text": "Both authors describe the spring flood as a frightening danger that the people learned to dread."
+      }
+    ],
+    "key": [
+      "a",
+      "b"
+    ],
+    "feedback": "Two real contrasts: Okafor attributes survival to shared effort ('built by every household together'), while Delacroix attributes order to 'the steady hand of the magistrate' (A); and Okafor writes as a remembering insider while Delacroix writes as a later student of 'the dusty council records,' having 'never lived there' (B). C is wrong — neither account blames war. D is wrong — both authors agree the aqueduct existed; they differ only in feeling. E is wrong — only Delacroix fears the flood; Okafor calls it a blessing.",
+    "passage_text": "When the historian Okafor wrote of Yenvale, she wrote with love. The aqueduct, she said, was \"our proudest achievement, built by every household together.\" Each spring the river overran its banks and left behind the rich silt that fed the fields, and she insisted cooperation had been the settlement's true foundation. The magistrate Delacroix, who never lived there, judged it differently. Reading the dusty council records generations later, he concluded that Yenvale survived only through the steady hand of the magistrate, not neighborly goodwill. The aqueduct, he wrote, was a constant quarrel, for each family accused the next of taking more than its fair share, and the same spring waters could carry off a year of stored grain in one night. On the end they agreed on nothing: Okafor believed the silt that fed the fields at last choked the channels no one could clear, while Delacroix recorded that, family by family, the people left, worn out by quarrels no magistrate could settle.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.9",
+    "type": "mcq",
+    "difficulty": "medium",
+    "ccss": "RI.5.9",
+    "stem": "Each author explains why Yenvale was finally abandoned, and their explanations conflict. What is the BEST description of how the two reasons differ?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Okafor blames the silt that buried the channels; Delacroix blames the quarrels that drove families away."
+      },
+      {
+        "id": "b",
+        "text": "Okafor blames a single sudden earthquake; Delacroix blames a long and slow-spreading valley-wide drought."
+      },
+      {
+        "id": "c",
+        "text": "Okafor blames an invading foreign army; Delacroix blames a sickness that swept through every household."
+      },
+      {
+        "id": "d",
+        "text": "Both authors place the blame squarely on the very same disastrous and unexpected failed harvest."
+      }
+    ],
+    "key": "a",
+    "feedback": "Okafor names a physical cause: 'the silt that fed the fields at last choked the channels no one could clear.' Delacroix names a social cause: 'family by family, the people left, worn out by quarrels no magistrate could settle.' The accounts genuinely disagree about the cause — they do not blame one harvest (D), and neither names an earthquake, drought, army, or disease (B, C), so those are world-knowledge guesses the text does not support.",
+    "passage_text": "When the historian Okafor wrote of Yenvale, she wrote with love. The aqueduct, she said, was \"our proudest achievement, built by every household together.\" Each spring the river overran its banks and left behind the rich silt that fed the fields, and she insisted cooperation had been the settlement's true foundation. The magistrate Delacroix, who never lived there, judged it differently. Reading the dusty council records generations later, he concluded that Yenvale survived only through the steady hand of the magistrate, not neighborly goodwill. The aqueduct, he wrote, was a constant quarrel, for each family accused the next of taking more than its fair share, and the same spring waters could carry off a year of stored grain in one night. On the end they agreed on nothing: Okafor believed the silt that fed the fields at last choked the channels no one could clear, while Delacroix recorded that, family by family, the people left, worn out by quarrels no magistrate could settle.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.9",
+    "type": "msq",
+    "difficulty": "hard",
+    "ccss": "RI.5.9",
+    "stem": "Select the TWO points on which the two accounts AGREE, even though their overall judgments of Yenvale differ. Choose exactly two.",
+    "options": [
+      {
+        "id": "a",
+        "text": "That a built stone aqueduct supplied the settlement with all of its drinking water."
+      },
+      {
+        "id": "b",
+        "text": "That the river overran its banks across the valley floor each and every spring."
+      },
+      {
+        "id": "c",
+        "text": "That open cooperation among the households was plainly the settlement's greatest strength."
+      },
+      {
+        "id": "d",
+        "text": "That a single firm magistrate alone deserves the credit for keeping the peace and order."
+      },
+      {
+        "id": "e",
+        "text": "That the whole settlement was destroyed in one single night by a fast-moving fire."
+      }
+    ],
+    "key": [
+      "a",
+      "b"
+    ],
+    "feedback": "Both authors report the aqueduct (A) and the yearly spring flood (B) as facts, even though they feel opposite ways about each. The remaining options are points of disagreement, not agreement: cooperation is Okafor's claim alone (C), the magistrate is Delacroix's claim alone (D), and neither author says the settlement burned in a night (E) — Okafor blames silt, Delacroix blames slow departure.",
+    "passage_text": "When the historian Okafor wrote of Yenvale, she wrote with love. The aqueduct, she said, was \"our proudest achievement, built by every household together.\" Each spring the river overran its banks and left behind the rich silt that fed the fields, and she insisted cooperation had been the settlement's true foundation. The magistrate Delacroix, who never lived there, judged it differently. Reading the dusty council records generations later, he concluded that Yenvale survived only through the steady hand of the magistrate, not neighborly goodwill. The aqueduct, he wrote, was a constant quarrel, for each family accused the next of taking more than its fair share, and the same spring waters could carry off a year of stored grain in one night. On the end they agreed on nothing: Okafor believed the silt that fed the fields at last choked the channels no one could clear, while Delacroix recorded that, family by family, the people left, worn out by quarrels no magistrate could settle.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.3",
+    "type": "mcq",
+    "difficulty": "medium",
+    "ccss": "RI.5.3",
+    "stem": "According to the passage, what is the direct cause of the wolf packs leaving the Coldwater valley?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Hunters reduced the herds of elk the wolves depended on for food."
+      },
+      {
+        "id": "b",
+        "text": "A series of mild winters let the beaver dams drain, drying the streams."
+      },
+      {
+        "id": "c",
+        "text": "The willows grew so dense that the elk could no longer be hunted easily."
+      },
+      {
+        "id": "d",
+        "text": "Warmer summers melted the snowpack the wolves needed to track prey."
+      }
+    ],
+    "key": "b",
+    "feedback": "Follow the chain the passage actually names. The text says, 'When several mild winters in a row let the old beaver dams drain, the streams thinned and the elk wandered upland.' With the elk gone, the wolves followed and left the valley. Hunters (a) are never mentioned; dense willows (c) and melting snowpack (d) borrow words from elsewhere in the passage but are not the stated cause.",
+    "passage_text": "For decades the Coldwater valley puzzled the rangers who studied it. Common sense suggested that fewer wolves should mean more of everything else, yet the opposite kept happening. When several mild winters in a row let the old beaver dams drain, the streams thinned and the elk wandered upland in search of greener slopes. The wolves, having lost the herds they depended on, soon followed and left the valley behind. What surprised the rangers came next. Freed from the wolves, the remaining elk lingered along the bare banks and cropped every willow shoot before it could rise. Without willow roots to bind it, the soil loosened, and each spring rain carried more of the bank into the current. The water grew muddy, the trout thinned, and the songbirds that had nested in the willows drifted elsewhere. Removing one predator, the rangers learned, had quietly unraveled a whole valley.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.3",
+    "type": "mcq",
+    "difficulty": "medium",
+    "ccss": "RI.5.3",
+    "stem": "Based on the passage, why did the trout in the valley thin out?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Eroded soil washed into the streams and clouded the water they lived in."
+      },
+      {
+        "id": "b",
+        "text": "The wolves that left the valley had once kept the trout's predators in check."
+      },
+      {
+        "id": "c",
+        "text": "The mild winters warmed the streams beyond what the trout could tolerate."
+      },
+      {
+        "id": "d",
+        "text": "The elk crowded the banks and trampled the shallow pools where trout spawned."
+      }
+    ],
+    "key": "a",
+    "feedback": "Trace the cause the passage links to the trout. After the willows were eaten, 'the soil loosened, and each spring rain carried more of the bank into the current. The water grew muddy, the trout thinned.' So muddy, eroded water thinned the trout (a). The warm streams (c) and trampled pools (d) sound plausible but are never stated; the wolves (b) affected the elk, not the trout's predators.",
+    "passage_text": "For decades the Coldwater valley puzzled the rangers who studied it. Common sense suggested that fewer wolves should mean more of everything else, yet the opposite kept happening. When several mild winters in a row let the old beaver dams drain, the streams thinned and the elk wandered upland in search of greener slopes. The wolves, having lost the herds they depended on, soon followed and left the valley behind. What surprised the rangers came next. Freed from the wolves, the remaining elk lingered along the bare banks and cropped every willow shoot before it could rise. Without willow roots to bind it, the soil loosened, and each spring rain carried more of the bank into the current. The water grew muddy, the trout thinned, and the songbirds that had nested in the willows drifted elsewhere. Removing one predator, the rangers learned, had quietly unraveled a whole valley.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.3",
+    "type": "mcq",
+    "difficulty": "hard",
+    "ccss": "RI.5.3",
+    "stem": "The passage describes the events as a chain of causes and effects. Which event must happen FIRST for the others in the chain to follow?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A run of mild winters lets the beaver dams drain."
+      },
+      {
+        "id": "b",
+        "text": "The willow shoots are cropped before they can grow."
+      },
+      {
+        "id": "c",
+        "text": "The wolves lose their herds and leave the valley."
+      },
+      {
+        "id": "d",
+        "text": "The soil loosens and washes into the streams."
+      }
+    ],
+    "key": "a",
+    "feedback": "Work backward along the chain. The soil loosens (d) because willows were eaten (b); the willows were eaten because the wolves left (c); the wolves left because the elk wandered off after 'several mild winters in a row let the old beaver dams drain.' That winter-and-dam event (a) starts everything, so it must come first. The others are all downstream effects.",
+    "passage_text": "For decades the Coldwater valley puzzled the rangers who studied it. Common sense suggested that fewer wolves should mean more of everything else, yet the opposite kept happening. When several mild winters in a row let the old beaver dams drain, the streams thinned and the elk wandered upland in search of greener slopes. The wolves, having lost the herds they depended on, soon followed and left the valley behind. What surprised the rangers came next. Freed from the wolves, the remaining elk lingered along the bare banks and cropped every willow shoot before it could rise. Without willow roots to bind it, the soil loosened, and each spring rain carried more of the bank into the current. The water grew muddy, the trout thinned, and the songbirds that had nested in the willows drifted elsewhere. Removing one predator, the rangers learned, had quietly unraveled a whole valley.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RI.5.3",
+    "type": "ebsr",
+    "difficulty": "easy",
+    "ccss": "RI.5.3",
+    "stem": "Part A: According to the passage, what was the effect of the wolves leaving the valley on the willows? Part B: Which sentence from the passage best supports the answer to Part A?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Part A: With no wolves to move them, the elk stayed and ate the willow shoots before they could grow."
+      },
+      {
+        "id": "b",
+        "text": "Part A: With no wolves left to hunt them, the willows finally spread along the banks and crowded out the elk."
+      },
+      {
+        "id": "c",
+        "text": "Part A: With no wolves hunting nearby, the beavers came back to the streams and fed on the young willow shoots."
+      },
+      {
+        "id": "d",
+        "text": "Part B: \"Freed from the wolves, the remaining elk lingered along the bare banks and cropped every willow shoot before it could rise.\""
+      },
+      {
+        "id": "e",
+        "text": "Part B: \"Without willow roots to bind it, the soil loosened, and each spring rain carried more of the bank into the current.\""
+      },
+      {
+        "id": "f",
+        "text": "Part B: \"The wolves, having lost the herds they depended on, soon followed and left the valley behind.\""
+      }
+    ],
+    "key": [
+      "a",
+      "d"
+    ],
+    "feedback": "Watch the direction of the effect. It is tempting to think that fewer wolves would let plants flourish, but the passage reverses this: 'Freed from the wolves, the remaining elk lingered along the bare banks and cropped every willow shoot before it could rise.' So the wolves leaving let the elk EAT the willows (Part A = a), and that exact sentence is the proof (Part B = d). Sentence e describes what happened after the willows were gone, and f explains why the wolves left, but neither names the effect on the willows.",
+    "passage_text": "For decades the Coldwater valley puzzled the rangers who studied it. Common sense suggested that fewer wolves should mean more of everything else, yet the opposite kept happening. When several mild winters in a row let the old beaver dams drain, the streams thinned and the elk wandered upland in search of greener slopes. The wolves, having lost the herds they depended on, soon followed and left the valley behind. What surprised the rangers came next. Freed from the wolves, the remaining elk lingered along the bare banks and cropped every willow shoot before it could rise. Without willow roots to bind it, the soil loosened, and each spring rain carried more of the bank into the current. The water grew muddy, the trout thinned, and the songbirds that had nested in the willows drifted elsewhere. Removing one predator, the rangers learned, had quietly unraveled a whole valley.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RL.5.1",
+    "type": "hottext",
+    "difficulty": "hard",
+    "ccss": "RL.5.1",
+    "stem": "Select the ONE sentence that BEST lets the reader infer that Tomas had been helping someone else before he got home, rather than simply running late.",
+    "options": [
+      {
+        "id": "s1",
+        "text": "Mara stacked the last of the pears and glanced once toward the road, where Tomas was due back by dusk."
+      },
+      {
+        "id": "s2",
+        "text": "She still had strength in her arms, but she left the baskets where they sat, telling herself that the unfinished work could keep until the morning light returned."
+      },
+      {
+        "id": "s3",
+        "text": "The valley went blue, then black, and the road stayed empty longer than she liked."
+      },
+      {
+        "id": "s4",
+        "text": "Tomas came up the road well after the stars, his coat dark with another man's trouble, and said only that the Hale family's roof had not waited."
+      },
+      {
+        "id": "s5",
+        "text": "Her shoulders, which had been set tight all evening, loosened at the shape of him on the road."
+      }
+    ],
+    "key": "s4",
+    "feedback": "The question asks which sentence shows Tomas was HELPING someone, not just late. Sentence s4 carries that inference: his 'coat dark with another man's trouble' and the remark that 'the Hale family's roof had not waited' imply he had been working on the Hales' roof. Sentence s3 shows only that he was late, and s5 shows Mara's relief, not where Tomas had been. The answer is s4.",
+    "passage_text": "Mara stacked the last of the pears and glanced once toward the road, where Tomas was due back by dusk. She still had strength in her arms, but she left the baskets where they sat, telling herself that the unfinished work could keep until the morning light returned. The valley went blue, then black, and the road stayed empty longer than she liked. She listened for the creak of the gate and heard only the wind moving through the orchard rows. Tomas came up the road well after the stars, his coat dark with another man's trouble, and said only that the Hale family's roof had not waited. Her shoulders, which had been set tight all evening, loosened at the shape of him on the road.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  },
+  {
+    "skill": "RL.5.1",
+    "type": "hottext",
+    "difficulty": "medium",
+    "ccss": "RL.5.1",
+    "stem": "Select the ONE sentence that BEST supports the inference that Mara grew uneasy as the evening went on.",
+    "options": [
+      {
+        "id": "s1",
+        "text": "Mara stacked the last of the pears and glanced once toward the road, where Tomas was due back by dusk."
+      },
+      {
+        "id": "s2",
+        "text": "She still had strength in her arms, but she left the baskets where they sat, telling herself that the unfinished work could keep until the morning light returned."
+      },
+      {
+        "id": "s3",
+        "text": "The valley went blue, then black, and the road stayed empty longer than she liked."
+      },
+      {
+        "id": "s4",
+        "text": "Tomas came up the road well after the stars, his coat dark with another man's trouble, and said only that the Hale family's roof had not waited."
+      },
+      {
+        "id": "s5",
+        "text": "Her shoulders, which had been set tight all evening, loosened at the shape of him on the road."
+      }
+    ],
+    "key": "s3",
+    "feedback": "The question asks which sentence shows Mara's growing unease. Sentence s3 does it: the road 'stayed empty longer than she liked' signals her discomfort as time passed. Sentence s1 only sets up that she expected him; s5 describes the moment her unease lifted, not when it grew. The answer is s3.",
+    "passage_text": "Mara stacked the last of the pears and glanced once toward the road, where Tomas was due back by dusk. She still had strength in her arms, but she left the baskets where they sat, telling herself that the unfinished work could keep until the morning light returned. The valley went blue, then black, and the road stayed empty longer than she liked. She listened for the creak of the gate and heard only the wind moving through the orchard rows. Tomas came up the road well after the stars, his coat dark with another man's trouble, and said only that the Hale family's roof had not waited. Her shoulders, which had been set tight all evening, loosened at the shape of him on the road.",
+    "passage_source": "machine-authored-cold",
+    "humanApproved": false
+  }
+]

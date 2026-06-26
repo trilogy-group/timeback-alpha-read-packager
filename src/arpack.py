@@ -32,7 +32,7 @@ INPUT skeleton schema (the contract for what feeds the packager):
 }
 Drop forever (no home in production): skillCode, lessonCode, any video/media.
 """
-import json, os, re, sys
+import html, json, os, re, sys
 from xml.etree import ElementTree as ET
 
 # ---- input adapter: parse + normalize Mayank's raw QTI 3.0 item XML. Only single-select 'choice'
@@ -396,6 +396,268 @@ def from_qti_stimulus_xml(xml):
 def _first_heading(html):
     m = re.search(r"<h[12][^>]*>(.*?)</h[12]>", html or "", re.S)
     return re.sub(r"<[^>]+>", "", m.group(1)).strip() if m else None
+
+
+# ───────────────── passage rendering (structure-preserving) ─────────────────
+# Lifted from the proven reconstruction in g5-merged-course/restore_stimuli.py so a FRESH publish
+# emits well-blocked passages directly. The old publisher flattener split on EVERY newline and
+# escaped everything, collapsing structured source into one tagless <p> — titles welding onto bodies
+# ("PapyrusIn"), one passage running into the next, table cells welding into one run-on string.
+# publish_powerpath*.py:_txt_to_html delegate to passage_html_div(), so both publishers (G3 + G5)
+# stop re-flattening, and restore_stimuli.py is needed only for ALREADY-live flattened content.
+
+def _esc(t):
+    return (t or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _inline_md(t):
+    """Inline markdown on already-escaped text: **bold** -> <strong>, *em* -> <em>."""
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", t)
+    return t
+
+
+def _fix_void(s):
+    """Self-close bare void tags (<br>, <hr>) — they carry real structure (verse breaks) but are
+    invalid XML. Replace, never kill."""
+    s = re.sub(r"<\s*br\s*>", "<br/>", s, flags=re.I)
+    s = re.sub(r"<\s*hr\s*>", "<hr/>", s, flags=re.I)
+    s = re.sub(r"<\s*br\s*/\s*/\s*>", "<br/>", s, flags=re.I)
+    return s
+
+
+def _md_table(chunk):
+    """Markdown pipe-table -> semantic <table> (cell text verbatim). Returns None if `chunk` is not
+    a table (no '|:---|'-style separator row). A flattened data table is the worst run-on failure;
+    QTI 3.0's HTML5 content model supports <table>, so reconstruct it."""
+    rows = [ln for ln in chunk.split("\n") if ln.strip()]
+    if len(rows) < 2 or "|" not in rows[1]:
+        return None
+    # row 2 must be a genuine separator: every cell a dash-run with optional alignment colons
+    # (accepts '---', ':-', ':---:'). Matching by structure, not an "-{2,}" substring, avoids a data
+    # row that merely contains '--' being misread as a table header rule.
+    sep = [c.strip() for c in rows[1].strip().strip("|").split("|")]
+    if not sep or not all(re.fullmatch(r":?-+:?", c) for c in sep):
+        return None
+
+    def cells(line):
+        line = line.strip()
+        line = line[1:] if line.startswith("|") else line
+        line = line[:-1] if line.endswith("|") else line
+        return [c.strip() for c in line.split("|")]
+
+    head = cells(rows[0])
+    data = [cells(r) for r in rows[2:]]
+    thead = "<thead><tr>%s</tr></thead>" % "".join("<th>%s</th>" % _inline_md(_esc(c)) for c in head)
+    tbody = "<tbody>%s</tbody>" % "".join(
+        "<tr>%s</tr>" % "".join("<td>%s</td>" % _inline_md(_esc(c)) for c in r) for r in data)
+    return "<table>%s%s</table>" % (thead, tbody)
+
+
+def _md_to_blocks(src):
+    """Deterministic markdown / plain text -> list of block HTML (<h3>/<h4>/<p>/<ul>/<table>).
+    Splits paragraphs on BLANK LINES ONLY and joins soft-wrapped lines within a block — the fix for
+    the old flattener, which split on every single newline and so destroyed intra-paragraph spacing."""
+    src = (src or "").replace("\r\n", "\n").replace("\r", "\n")
+    # force a blank line before/after a heading line so "### Title\nBody" splits into two blocks
+    src = re.sub(r"\n(?=#{1,6}\s)", "\n\n", src)
+    src = re.sub(r"(?m)^(#{1,6}[ \t]+\S[^\n]*)\n(?!\n)", r"\1\n\n", src)
+    blocks = []
+    for raw in re.split(r"\n\s*\n", src):
+        chunk = raw.strip()
+        if not chunk:
+            continue
+        tbl = _md_table(chunk)
+        if tbl:
+            blocks.append(tbl)
+            continue
+        if all(re.match(r"\s*[-*]\s+", ln) for ln in chunk.split("\n") if ln.strip()):
+            lis = "".join("<li>%s</li>" % _inline_md(_esc(re.sub(r"^\s*[-*]\s+", "", ln).strip()))
+                          for ln in chunk.split("\n") if ln.strip())
+            blocks.append("<ul>%s</ul>" % lis)
+            continue
+        h = re.match(r"^(#{1,6})\s+(.*)$", chunk)
+        if h:
+            level = 3 if len(h.group(1)) <= 3 else 4
+            blocks.append("<h%d>%s</h%d>" % (level, _inline_md(_esc(h.group(2).strip())), level))
+            continue
+        if re.fullmatch(r"\*\*.+\*\*", chunk):
+            blocks.append("<p>%s</p>" % _inline_md(_esc(chunk)))
+            continue
+        para = " ".join(ln.strip() for ln in chunk.split("\n"))   # join soft-wrapped lines
+        blocks.append("<p>%s</p>" % _inline_md(_esc(para)))
+    return blocks
+
+
+def _html_to_blocks(src):
+    """Already-structured HTML -> re-emit verbatim (only void tags repaired). No re-extraction — that
+    risked dropping nested inline markup."""
+    s = re.sub(r">\s+<", "><", (src or "").strip())
+    s = _fix_void(s)
+    if not s:
+        return []
+    if not re.match(r"\s*<(h[1-6]|p|ul|ol|div|blockquote)\b", s, re.I):
+        return ["<p>%s</p>" % s]
+    return [s]
+
+
+def passage_blocks(src):
+    """Structure-preserving passage renderer -> list of block-HTML strings. HTML input (block OR
+    inline markup) passes through verbatim (void-repaired); markdown / plain text is blocked
+    deterministically with pipe-table -> <table> and soft-wrap joining. This is the shared renderer
+    both publishers delegate to, replacing the flattener that split on every newline."""
+    if not (src or "").strip():
+        return []
+    if re.search(r"</?(?:h[1-6]|p|ul|ol|li|div|blockquote|strong|em|b|i|br)\b", src, re.I):
+        b = _html_to_blocks(src)
+        if b:
+            return b
+    return _md_to_blocks(src)
+
+
+def passage_html_div(src, title=None):
+    """Render a passage to '<div class="passage">[<h3>title</h3>]<blocks></div>'. The title heading
+    is prepended ONLY when the body does not already lead with its own heading (matches the
+    publishers' prior behaviour, minus the flattening)."""
+    inner = "".join(passage_blocks(src))
+    if not inner:
+        inner = "<p>%s</p>" % _esc(src or "")
+    lead = bool(re.match(r"\s*<h[1-6]\b", inner, re.I))
+    head = ("<h3>%s</h3>" % _esc(title)) if title and not lead else ""
+    return '<div class="passage">%s%s</div>' % (head, inner)
+
+
+# ───────────────── kid-facing title derivation + guard ─────────────────
+# PURE heuristics lifted from g5-merged-course/retitle/derive_titles.py. derive_title() PROPOSES a
+# title for a propose-then-human-approve flow — it is NOT auto-called in the publish path (the live
+# apply is a PUT, gated). assert_kid_facing_title() is the BUILD-TIME GUARD the publishers run so QA
+# jargon / question stems / structural labels can never reach a learner title — the live-UI
+# regression that prompted this. Cert/leak disclosure belongs in metadata + PACKAGE_NOTE, never a
+# title a student reads.
+
+_TITLE_PREFIX_RE = re.compile(
+    r"^\s*(?:text|passage|source|story|part|section|reading|excerpt|article|document|"
+    r"selection|chapter|account|paragraph|exhibit)\s*(?:[A-Za-z]|\d+)?\s*[:.\-–—)]+\s*", re.I)
+_TITLE_LEADNUM_RE = re.compile(r"^\s*(?:[A-Za-z]|\d+)\s*[:.\-–—)]+\s*")
+_TITLE_QWORD = re.compile(r"^(how|which|what|why|who|where|when|in what|to what|whose|whom)\b", re.I)
+# A QWORD-leading phrase is a QUESTION only when it ends with '?' or shows subject-auxiliary
+# inversion ("How DO volcanoes erupt"). A bare QWORD phrase with no inversion is a legitimate
+# declarative title ("How Volcanoes Erupt", "Why Leaves Change Color") and must NOT be flagged —
+# the guard runs on every build title, so a false-positive here would break a clean build.
+_TITLE_Q_INVERSION = re.compile(
+    r"^(?:how|which|what|why|who|where|when|whose|whom)\b[\w\s,'’-]*?\b"
+    r"(?:do|does|did|is|are|was|were|can|could|will|would|should|shall|"
+    r"has|have|had|may|might|must)\b", re.I)
+_TITLE_STRUCT_LABEL = re.compile(
+    r"^(panel|figure|fig|table|diagram|step|part|item|exhibit|chart|map|image|photo|"
+    r"section|column|row|box)\s*\d*$", re.I)
+_TITLE_JARGON_RE = re.compile(
+    r"\b(verified|uncertified|cross-?family|blind[-\s]?(?:cert\w*|solv\w*)|leak(?:able|age)?|"
+    r"human[-\s]?approved|inceptbench|cert-?status)\b", re.I)
+_TITLE_VERB = (r"\b(is|are|was|were|begins?|began|forms?|formed|happens?|occurs?|occurred|refers?|"
+               r"describes?|tells?|stretches?|connects?|lies|sits|grows?|grew|lives?|lived|travels?|"
+               r"traveled|moves?|moved|spreads?|spread|erupts?|erupted|sat|works?|worked|stood|"
+               r"stands?|covers?|covered|rises?|rose|flows?|flowed|carries|carried|hatch(?:es)?|"
+               r"nests?)\b")
+_TITLE_STOP_TAIL = re.compile(r"\s+(of|in|on|to|for|with|and|that|which|as|from|by|at|into|over|"
+                              r"a|an|the|its|their|his|her)$", re.I)
+_TITLE_SMALL = {"of", "in", "on", "to", "for", "with", "and", "the", "a", "an", "as", "at", "by", "from"}
+
+
+def _title_is_question(t):
+    return bool(t) and (t.rstrip().endswith("?") or bool(_TITLE_Q_INVERSION.match(t)))
+
+
+def _clean_title(t):
+    t = html.unescape(re.sub(r"<[^>]+>", " ", t or ""))
+    t = re.sub(r"\s+", " ", t).strip().strip("\"'“”‘’").strip()
+    for _ in range(3):
+        n = _TITLE_LEADNUM_RE.sub("", _TITLE_PREFIX_RE.sub("", t))
+        if n == t:
+            break
+        t = n
+    return t.strip()
+
+
+def _good_heading(t):
+    if not t or _title_is_question(t):
+        return False
+    low = t.lower()
+    if low.startswith(("lesson", "verified", "reading (rich", "reading practice")):
+        return False
+    if _TITLE_STRUCT_LABEL.match(t.strip()) or re.fullmatch(r"[\W\d]+", t):
+        return False
+    return 1 <= len(t.split()) <= 12 and len(t) <= 80
+
+
+def _headings_of(html_str):
+    out = []
+    for tag in ("h1", "h2", "h3", "h4"):
+        out += re.findall(r"<%s[^>]*>(.*?)</%s>" % (tag, tag), html_str or "", re.I | re.S)
+    out += re.findall(r"<(?:strong|b)[^>]*>(.*?)</(?:strong|b)>", html_str or "", re.I | re.S)
+    return out
+
+
+def _first_passage_sentence(html_str):
+    m = re.search(r"<qti-stimulus-body[^>]*>(.*?)</qti-stimulus-body>", html_str or "", re.S | re.I)
+    body = m.group(1) if m else (html_str or "")
+    ps = re.findall(r"<p[^>]*>(.*?)</p>", body, re.S | re.I)
+    txt = html.unescape(re.sub(r"<[^>]+>", " ", ps[0] if ps else body))
+    txt = re.sub(r"\s+", " ", txt).strip()
+    return re.split(r"(?<=[.!?])\s", txt)[0] if txt else ""
+
+
+def _prose_title(html_str):
+    s = _first_passage_sentence(html_str)
+    if not s:
+        return None
+    m = re.match(r"^(.{2,46}?)\s+%s" % _TITLE_VERB, s)
+    cand = m.group(1) if m else None
+    if not cand or len(cand.split()) > 7:
+        cand = " ".join(s.split(",")[0].split()[:6])
+    cand = cand.strip().strip(",;:")
+    while _TITLE_STOP_TAIL.search(cand):
+        cand = _TITLE_STOP_TAIL.sub("", cand)
+    cand = cand.strip()
+    words = cand.split()
+    cand = " ".join(w if (i and w.lower() in _TITLE_SMALL) else (w[:1].upper() + w[1:])
+                    for i, w in enumerate(words))
+    return cand if 2 <= len(words) <= 7 and len(cand) <= 64 else None
+
+
+def derive_title(stimulus_html):
+    """Propose a clean, kid-facing title from a passage's HTML. Returns (title, confidence, how):
+      (heading, 'high', 'heading') — a real passage heading that is not a question / structural label
+      (prose,   'med',  'prose')   — deterministic subject phrase from the first sentence
+      (None,    'none', 'none')    — nothing derivable; caller falls back (e.g. 'Reading Practice N').
+    PURE: no network, no merge_publish coupling. A PROPOSER for human review, never auto-applied."""
+    for c in _headings_of(stimulus_html):
+        cc = _clean_title(c)
+        if _good_heading(cc):
+            return cc, "high", "heading"
+    pt = _prose_title(stimulus_html)
+    if pt:
+        return pt, "med", "prose"
+    return None, "none", "none"
+
+
+def assert_kid_facing_title(title):
+    """Build-time fail-closed guard: raise ValueError if `title` is QA/cert jargon, a question stem,
+    or a structural label — the three classes that leaked to the live G5 learner UI. A clean
+    passage-derived name or the neutral 'Reading Practice N' fallback passes. Returns the title on
+    success so callers can use it inline."""
+    t = (title or "").strip()
+    if not t:
+        raise ValueError("kid-facing title is empty")
+    if _TITLE_JARGON_RE.search(t):
+        raise ValueError("QA/cert jargon in learner title: %r" % title)
+    if re.fullmatch(r"lesson\s*\d+", t, re.I):
+        raise ValueError("placeholder 'Lesson N' used as learner title: %r" % title)
+    if _title_is_question(t):
+        raise ValueError("question stem used as learner title: %r" % title)
+    if _TITLE_STRUCT_LABEL.match(t):
+        raise ValueError("structural label used as learner title: %r" % title)
+    return t
 
 
 def adapt_qti_item(parsed):
