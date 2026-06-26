@@ -63,7 +63,7 @@ Read-only stages need no approval; live stages are **[OK]**. Full detail in [The
 | `retitle/derive_titles.py` | **Stage 6** — run (no flags) | Derives kid-facing titles (heading-or-prose, fail-closed) → `/tmp/g5_retitle_map.json` for review. |
 | `retitle/apply_titles.py` | **Stage 7** — `--probe` (reversible) then `--apply` **[OK]** | PUTs approved titles to course / units / 81×5 title-bearing objects live (default run = dry). |
 
-**C. Live courses & supporting docs — live ids are **[OK]** (creds + OK; not locally resolvable).**
+**C. Live courses & supporting docs.** Live course ids are **[OK]** — creds + your per-action OK; not locally resolvable.
 
 | Link | What to do | What it does |
 |---|---|---|
