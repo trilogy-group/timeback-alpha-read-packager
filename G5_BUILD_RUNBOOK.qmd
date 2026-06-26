@@ -14,8 +14,9 @@ useful_for: "Running the next G5 (or any merged powerpath-100) build without re-
 This is the operating record of how `g5-reading-merged-pp-9802` was built (**81 lessons / 772 items /
 772 stimuli**), written so the *next* G5 build re-uses the fixes instead of re-finding them. The work
 currently lives as one-off scripts under `artifacts/g5-merged-course/`; this runbook is the canonical
-process, and the [Appendix](#appendix) is a staged proposal
-for folding those one-offs back into `src/arpack.py` + `examples/` so they stop being one-offs.
+process, and the [Appendix](#appendix) folds the durable logic back into `src/arpack.py` + `examples/` so
+it stops being one-offs — the safe batch (Folds 4, 1, 3) is **already landed** in commit `a05fb80`; Folds 2
+and 5 stay held (live-mutation / honesty-gated).
 
 **Honesty stance (binding, throughout).** MAP is 0/313 for this cohort → **no RIT, no "proven", no
 MAP-growth claim**. All machine items are `humanApproved:false` (no SME fact/key review). Every verdict
@@ -27,6 +28,57 @@ Stan's explicit OK. Every stage and fold that mutates live content (`--publish`,
 `--repost-content`, `--apply`) is marked **[requires OK]**. "Done" = confirmed by an independent
 read-back or a deterministic verifier — never an agent's self-report, and never a bare HTTP 200 (a PUT
 can return 200 and silently revert).
+
+---
+
+## Control panel — every link · what to do · what it does
+
+**Status (2026-06-26).** The safe code-fold batch — **Fold 4** (masteryThreshold default 90),
+**Fold 1** (shared structure-preserving renderer), **Fold 3** (title deriver + build-time guard) —
+is **LANDED**: committed as `a05fb80` and **pushed** to `origin/powerpath-publisher`. Suite went
+**207 → 242 cases** (167 test functions), all green. **Fold 2** (live PUT/upsert verb) and **Fold 5**
+(CCSS backfill) are **still pending** — both gated (see [Appendix](#appendix)). Everything marked
+**[OK]** writes to live TimeBack or a remote and needs Stan's explicit per-action OK.
+
+**A. Reusable packager — committed; use these for the next build.** Paths are repo-relative.
+
+| Link | What to do | What it does |
+|---|---|---|
+| `src/arpack.py` | import — the shared layer both publishers call | Structure-preserving passage renderer (`passage_blocks` / `passage_html_div`) + kid-facing title deriver (`derive_title`) + fail-closed build-time guard (`assert_kid_facing_title`). Pure, offline. |
+| `examples/publish_powerpath_g5.py` | `--dry-run` to build/validate offline · `--publish` **[OK]** to write live | G5 (grade 5) powerpath-100 publisher. New flags: `--mastery-threshold` (default 90), `--lenient-titles`. `_txt_to_html` delegates to arpack; title guard runs in dry-run **and** publish. |
+| `examples/publish_powerpath.py` | same CLI · `--dry-run` · `--publish` **[OK]** | G3 (grade 3) publisher — identical flag surface; same renderer, guard, and mastery default (only the grade differs). |
+| `examples/push_to_timeback.py` | POST new QTI entities (safe — 409 = exists = success) | POST-only pusher; **creates only, never PUT/PATCH/DELETE**. The live update verb does **not** live here yet ([Fold 2](#fold2)). |
+| `tests/` → `python3 -m pytest tests/ -q` | run before any build — expect **242 passed** | Full packager suite: 167 test functions / 242 cases, offline. |
+| `tests/test_passage_render_and_titles.py` | run to exercise the fold in isolation (35 cases) | Pins the renderer + title-guard contract (Folds 1/3/4). |
+
+**B. The 8-stage build scripts — one-offs under `artifacts/g5-merged-course/` (run from that dir).**
+Read-only stages need no approval; live stages are **[OK]**. Full detail in [The 8-stage sequence](#stages).
+
+| Link | What to do | What it does |
+|---|---|---|
+| `merge_readback.py` | **Stage 1** — `--discover`, then default pull (`--clean … --ela …`) | READ-ONLY GET of both live courses → `readback/` inventory + verbatim item/stimulus XML. |
+| `restore_stimuli.py` | **Stage 2** — `--report-only` first, then the real run | Local, fidelity-guarded re-block of flattened stimuli → `readback/stimuli_restored/`. Offline. |
+| `verify_restoration.py` | **Stage 3** — run (no flags) | Independent deterministic re-check (does not trust the restorer) → PASS/FAIL + offenders JSON. |
+| `merge_publish.py` | **Stage 4** `--dry-run` · **Stage 5** `--publish --org … [--repost-content]` **[OK]** | Builds the 81-lesson / 772-item merged skeleton referencing live item ids; stamps `masteryThreshold=90`; `--repost-content` PUTs restored stimuli (changed-only). |
+| `retitle/derive_titles.py` | **Stage 6** — run (no flags) | Derives kid-facing titles (heading-or-prose, fail-closed) → `/tmp/g5_retitle_map.json` for review. |
+| `retitle/apply_titles.py` | **Stage 7** — `--probe` (reversible) then `--apply` **[OK]** | PUTs approved titles to course / units / 81×5 title-bearing objects live (default run = dry). |
+
+**C. Live courses & supporting docs — live ids are **[OK]** (creds + OK; not locally resolvable).**
+
+| Link | What to do | What it does |
+|---|---|---|
+| `g5-reading-merged-pp-9802` | GET/PUT via API after creds + **[OK]** | The live merged course — the build target (powerpath-100). |
+| `grade5-reading-clean-pp-9801` | reference — Unit 1 source | Live **certified** spine: 172 items, cross-family blind-solve gated — *the bar*. |
+| `g5-reading-ela-pp-9801` | reference — Unit 2 source | Live **uncertified** graft: 600 items, ~90% passage-leakable — kept by explicit decision, flagged. |
+| `g5-merged-course/PACKAGE_NOTE.md` | read | Per-unit integrity + the **PASS-with-named-gaps** verdict + push gating (import-ready, not auto-pushed). |
+| `g5-merged-course/GENERATOR_DIRECTIVE.md` | hand to the generator track | "Optimize the course, not per-item IB"; queues replacement of the 600 leakable Unit-2 items. |
+
+**D. Repo / git.**
+
+| Link | What to do | What it does |
+|---|---|---|
+| `github.com/trilogy-group/timeback-alpha-read-packager` · branch `powerpath-publisher` | clone / fetch · push new commits **[OK]** | The packager repo + working branch carrying the fold. In sync with origin. |
+| commit `a05fb80` | `git show a05fb80` | "Fold G5 hardening into the reusable packager" — lands Folds 1/3/4 (4 files, +982 / −6). |
 
 ---
 
@@ -48,7 +100,7 @@ titles. Items, feedback wiring, and lesson grouping carry through verbatim.
 
 ---
 
-## The 8-stage sequence
+## The 8-stage sequence {#stages}
 
 Read-only stages run with zero approval. Live stages are marked **[requires OK]**.
 
@@ -144,16 +196,14 @@ The G3 publisher `examples/publish_powerpath.py:_txt_to_html` (~lines 164–168)
 (`re.split(r"\n\s*\n|\n", …)`) and `escape()`s everything, with **no HTML/markdown detection**. Structured
 source (single-line `<h3>…</h3><p>…</p>` HTML, `###`-markdown headings, or pipe-tables) collapses into one
 tagless `<p>`: titles weld onto bodies (`"PapyrusIn"`), one passage runs into the next
-(`"surface.Passage 2"`), table cells weld into one string. **This still-broken publisher is the one
-POWERPATH.md documents — a fresh G3 build re-flattens.**
+(`"surface.Passage 2"`), table cells weld into one string. **This was the live regression POWERPATH.md still documents** — before
+the fold, a fresh G3 build re-flattened.
 
-The fix exists only in the G5 fork: `examples/publish_powerpath_g5.py:_txt_to_html` (~lines 179–208) is
-structure-preserving — it passes already-structured HTML through verbatim (repairing only bare void tags)
-and converts `### Heading` → `<h3>`, `**x**` → bold. **Residual (open):** even the g5 renderer's
-pure-plain-text branch still splits on single newlines (line ~196), so a non-HTML/non-markdown passage can
-still lose intra-paragraph spacing. Not triggered by the current ELA source (HTML/markdown). The clean
-fix is a shared structure-preserving renderer both publishers delegate to —
-[Fold 1](#fold1).
+**Fixed (Fold 1, commit `a05fb80`).** Both publishers' `_txt_to_html` now delegate to the shared
+structure-preserving renderer `src/arpack.py:passage_html_div`: already-structured HTML passes through
+verbatim (repairing only bare void tags), `### Heading` → `<h3>`, `**x**` → bold, pipe-tables → `<table>`,
+and the plain-text branch splits paragraphs on **blank lines only** — the old single-newline split that lost
+intra-paragraph spacing is gone. Pinned by `tests/test_passage_render_and_titles.py`. See [Fold 1](#fold1).
 
 **Repairing already-live flattened stimuli:** you cannot fix a live stimulus by re-running the publisher
 (POST 409-skips). Push the corrected XML **directly** so it never re-enters the flattener — the Stage 2→3→5
@@ -162,12 +212,11 @@ is a live PUT and requires Stan's explicit OK.**
 
 ### Gotcha 3 — `masteryThreshold` is part of the lesson shape
 Without `masteryThreshold` on the resource metadata, the powerpath-100 gate does **not** block learners
-scoring <90. Both live G5 source courses shipped `masteryThreshold: null` and so did not gate. **Neither
-publisher sets it today** (`publish_powerpath.py` resource metadata ~lines 391–393,
-`publish_powerpath_g5.py` ~lines 428–434 both omit the key). Stamp `masteryThreshold: 90` into the
-resource / component-resource metadata exactly as `merge_publish.py` line 308 does (`<-- THE FIX`). A
-course already live with `null` needs a **PUT backfill** to enable the gate retroactively (Gotcha 1).
-Making this a first-class publish option is [Fold 4](#fold4).
+scoring <90. Both live G5 source courses shipped `masteryThreshold: null` and so did not gate. **Fixed
+(Fold 4, commit `a05fb80`):** both publishers now take `--mastery-threshold` (default **90**; `0`/`none`
+to omit) and stamp it into the resource / component-resource metadata exactly as `merge_publish.py` line
+308 does (`<-- THE FIX`). A course **already** live with `null` still needs a **PUT backfill** to enable
+the gate retroactively (Gotcha 1) — that PUT is [Fold 2](#fold2), still held. See [Fold 4](#fold4).
 
 ### Gotcha 4 — kid-facing titles {#g4-titles}
 The title a student reads (course, unit `courseComponent`, lesson `courseComponent`, `component-resource`)
@@ -178,8 +227,12 @@ re-titled. Cert / leak / integrity disclosure goes to **unit `certStatus` + cour
 `PACKAGE_NOTE`**, never a kid-facing title. Derivation rules live in `retitle/derive_titles.py` (heading-
 or-prose, fail-closed against questions and structural labels); `merge_publish.py` is regression-proofed
 (`UNIT_TITLES`, `_LESSON_TITLES` loader, `--title` default) so a fresh `--publish` won't re-leak jargon.
-**The publishers have no such defense today** — they stamp the source title verbatim. Folding the deriver
-+ a build-time guard into the packager is [Fold 3](#fold3).
+**Fixed (Fold 3, commit `a05fb80`):** both publishers now run `arpack.assert_kid_facing_title` over every
+unit/lesson title at build time — a question stem, cert/QA status, structural label, `Lesson N`
+placeholder, or empty string raises and aborts the build (override with `--lenient-titles`), and
+`arpack.derive_title` proposes clean passage-derived names. Declarative QWORD titles ("How Volcanoes
+Erupt") correctly pass; only true questions (a trailing `?` or subject-aux inversion) block. See
+[Fold 3](#fold3).
 
 ### Gotcha 5 — CCSS can be entirely absent, and codes are never fabricated
 All 772 G5 items carry **no CCSS** — in OneRoster metadata **and** in the QTI XML, on both source courses.
@@ -216,7 +269,7 @@ earned it, and anything heuristic is disclosed as heuristic.
 
 ---
 
-## Open gaps (carried forward)
+## Open gaps (carried forward) {#open-gaps-carried-forward}
 
 Flagged, not faked — these are true of the merged course as built (2026-06-26):
 
@@ -231,9 +284,9 @@ Flagged, not faked — these are true of the merged course as built (2026-06-26)
    MAP-growth claim (MAP 0/313).
 4. **35 stimuli use a fallback restore** with no authoritative origin — flagged, not asserted clean
    (Gotcha 6).
-5. **Publisher plain-text residual** — `publish_powerpath_g5._txt_to_html` line ~196 still splits on single
-   newlines for non-HTML/non-markdown input. Not triggered by the current HTML/markdown ELA source; low-risk
-   but un-fixed (Fold 1 closes it).
+5. **Publisher plain-text residual — CLOSED (Fold 1, commit `a05fb80`).** Both publishers now delegate to
+   `arpack.passage_html_div`, whose plain-text branch splits paragraphs on blank lines only; the old
+   single-newline split is gone and pinned by test. Kept here for history — no longer an open gap.
 6. **Live gates not run** — live QTI scoring + a live `audit_compliance` run are post-publish only and
    require Stan's push-OK. The merged course is import-ready, not live-verified for scoring as of the
    package note.
@@ -248,18 +301,22 @@ Flagged, not faked — these are true of the merged course as built (2026-06-26)
 ## Appendix — fold the one-offs back into the packager {#appendix}
 
 The Stage scripts above live under `artifacts/g5-merged-course/` as consumer one-offs. To streamline the
-**next** build, fold their durable logic into the reusable layer. **This appendix is a proposal — nothing
-here was edited, committed, pushed, or PUT.** Recommended order is low-risk-first; do **not** do all five at
-once.
+**next** build, fold their durable logic into the reusable layer. **Status: the safe batch — Folds 4, 1, 3
+— is LANDED** (committed `a05fb80`, pushed to `origin/powerpath-publisher`); **Folds 2 and 5 remain held**
+(live-mutation / honesty-gated). Nothing here was ever PUT to a live course. The remaining two are not to be
+done at once.
 
-**Test-suite note:** the suite is **149 test functions** across `tests/test_*.py`; **none** import
-`publish_powerpath*` / `push_to_timeback` / `merge_publish` (grep-clean), and `conftest.py` wires only
-`src/` onto `sys.path`. So adding new `src/arpack.py` functions and publisher options is **test-additive** —
-zero risk to the existing 149 — provided existing arpack functions are not edited in place.
+**Test-suite note:** the fold was test-additive — the suite went **207 → 242 cases (167 test functions)**,
+all green, by adding `tests/test_passage_render_and_titles.py` (18 functions / 35 cases) and editing **no**
+existing arpack function in place. The publisher modules are still not imported by the legacy suite
+(`conftest.py` wires only `src/` onto `sys.path`); the new test file adds `examples/` to its own `sys.path`
+to exercise the publisher delegation.
 
-### Fold 1 — shared structure-preserving `passage_blocks` renderer {#fold1}
+### Fold 1 — shared structure-preserving `passage_blocks` renderer ✅ LANDED (`a05fb80`) {#fold1}
+**Status: DONE — `src/arpack.py:passage_blocks` / `passage_html_div` shipped; both publishers delegate;
+pinned by `tests/test_passage_render_and_titles.py`.** Original target retained below for the record.
 **Target:** promote the heavy reconstruction into a new `src/arpack.py:passage_blocks(src)` (beside
-`from_qti_stimulus_xml`), and have both `publish_powerpath_g5._txt_to_html` **and** the still-broken
+`from_qti_stimulus_xml`), and have both `publish_powerpath_g5._txt_to_html` **and** the then-broken
 `publish_powerpath._txt_to_html` delegate to it. **Risk: low · effort: M.** Lift `md_table` /
 `html_to_blocks` / the byte-identical fidelity guard from `restore_stimuli.py`; fix the plain-text branch
 to split paragraphs on blank lines only (`\n\s*\n`) and join soft-wrapped lines within a block. **Net:** a
@@ -279,7 +336,10 @@ capability** — adding it to the shared module requires Stan's explicit OK, and
 Stan's per-run OK. Highest-leverage fold (it's what lets the publisher fix *already-live* content), but the
 most gated.
 
-### Fold 3 — `arpack.derive_title` + a fail-closed build-time guard {#fold3}
+### Fold 3 — `arpack.derive_title` + a fail-closed build-time guard ✅ LANDED (`a05fb80`) {#fold3}
+**Status: DONE — `arpack.derive_title` + `arpack.assert_kid_facing_title` shipped; both publishers guard
+every title at build time (`--lenient-titles` to override). Declarative QWORD titles pass; only true
+questions block.** Original target retained below for the record.
 **Target:** new `src/arpack.py:derive_title(stimulus_html) -> (title, confidence, how)`, called from both
 publishers' `build_plan` title sites. **Risk: low · effort: M.** Lift `derive_titles.py`'s pure heuristics
 (heading-or-prose, with `good_heading()` rejecting question stems and structural labels). Add a fail-closed
@@ -289,7 +349,9 @@ question stem or structural label, so QA jargon can never reach a learner title.
 coupled to the consumer and its apply step is a live PUT (Fold 2). Deriver proposes → JSON human-reviewed →
 apply on explicit OK; never auto-title live.
 
-### Fold 4 — `masteryThreshold` a first-class option defaulting to 90 {#fold4}
+### Fold 4 — `masteryThreshold` a first-class option defaulting to 90 ✅ LANDED (`a05fb80`) {#fold4}
+**Status: DONE — `--mastery-threshold` (default 90; `0`/`none` to omit) on both publishers; stamps the
+resource metadata.** Original target retained below for the record.
 **Target:** add `--mastery-threshold` (default 90; `0`/`none` to omit) to both publishers' `main()`, and
 inject `masteryThreshold` into the resource metadata exactly as `merge_publish.py` line 308 does. **Risk:
 low · effort: S — lowest-effort, highest-safety fold.** Makes a fresh build strictly *more* compliant than
@@ -306,15 +368,18 @@ flagged") until a real map exists. Most deferrable: no CCSS map is checked in to
 *standards-alignment* claim, not a code break.
 
 ### Recommended order
-1. **Fold 4** — masteryThreshold default 90 (S, output-only, lowest risk).
+1. **Fold 4** — masteryThreshold default 90 (S, output-only, lowest risk). ✅ **DONE (`a05fb80`).**
 2. **Fold 1** — shared `passage_blocks` renderer (M; retires the restore one-offs for new builds; also fixes
-   the G3 publisher).
-3. **Fold 3** — `derive_title` + fail-closed guard (M; propose-then-approve).
+   the G3 publisher). ✅ **DONE (`a05fb80`).**
+3. **Fold 3** — `derive_title` + fail-closed guard (M; propose-then-approve). ✅ **DONE (`a05fb80`).**
 4. **Fold 2 [requires OK]** — `P.put`/`P.upsert` behind `--allow-update` + reversible `--probe` (M;
-   LIVE-MUTATION).
+   LIVE-MUTATION). ⏸ **HELD — needs Stan's explicit OK.**
 5. **Fold 5 [deferred]** — `--ccss-map` backfill (M; OFF by default, gated on a real human-authored map).
+   ⏸ **HELD — gated on a real human-authored CCSS map.**
 
-**Bottom line.** Land the safe batch (4, 1, 3) and the next G5 build needs no `restore` / `retitle` /
-`mastery` one-offs at all. Then Fold 2 under explicit approval as the reusable live-update verb. Then Fold 5
-when a CCSS map exists. Stage it; this is a proposal, and every live / PUT / `--publish` / `--apply` /
-`--repost-content` step requires Stan's explicit OK.
+**Bottom line.** The safe batch (4, 1, 3) is **landed** (`a05fb80`, pushed) — the next G5 build needs no
+`mastery` one-off, no `restore`/`verify` pass to repair *newly-published* content, and no separate
+`retitle` derivation step; the renderer, title guard, and mastery default now live in the reusable layer.
+**Still open:** Fold 2 (the reusable live-update PUT verb) under explicit approval, and Fold 5 (`--ccss-map`)
+when a human-authored map exists. Every live / PUT / `--publish` / `--apply` / `--repost-content` step still
+requires Stan's explicit OK.
