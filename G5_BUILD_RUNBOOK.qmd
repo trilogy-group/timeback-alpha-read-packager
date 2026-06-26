@@ -1,0 +1,320 @@
+---
+id: g5-build-runbook
+title: "G5 Reading merged-course build runbook — every round of changes, so the next build needs no re-discovery"
+source: "G5 merge → publish → retitle thread; consolidates artifacts/g5-merged-course/ one-offs back into the packager; 2026-06-26"
+type: reference
+tags: [grade5-reading, timeback, powerpath-100, runbook, merge, publish, put-update, stimulus-render, mastery-threshold, kid-facing-titles, agent-handoff]
+keywords: [g5-reading-merged-pp-9802, grade5-reading-clean-pp-9801, g5-reading-ela-pp-9801, put-on-409, masteryThreshold-90, stimulus-flattener, passage_blocks, derive_title, upsert_stimulus, apply_titles, restore_stimuli, repost-content, ccss-map, cross-family-blind-solve, humanApproved-false]
+summary: "End-to-end runbook for building the merged Grade-5 Reading powerpath-100 course, written from the live build that produced g5-reading-merged-pp-9802 (81 lessons / 772 items / 772 stimuli). Captures the five rounds of hard-won fixes — merge-by-reference skeleton, masteryThreshold=90, structure-preserving stimulus render, PUT-on-409 as the live-update verb, kid-facing passage-derived titles — as a runnable 8-stage sequence, six gotchas, a live-write checklist, and a five-item code-fold appendix that pulls the one-off g5-merged-course/ scripts back into the reusable packager."
+useful_for: "Running the next G5 (or any merged powerpath-100) build without re-discovering the flattener, PUT, mastery, and title fixes; deciding which one-off scripts to fold into src/arpack.py + examples/; knowing exactly which steps need Stan's explicit OK before any live write."
+---
+
+# G5 merged-course build runbook
+
+This is the operating record of how `g5-reading-merged-pp-9802` was built (**81 lessons / 772 items /
+772 stimuli**), written so the *next* G5 build re-uses the fixes instead of re-finding them. The work
+currently lives as one-off scripts under `artifacts/g5-merged-course/`; this runbook is the canonical
+process, and the [Appendix](#appendix) is a staged proposal
+for folding those one-offs back into `src/arpack.py` + `examples/` so they stop being one-offs.
+
+**Honesty stance (binding, throughout).** MAP is 0/313 for this cohort → **no RIT, no "proven", no
+MAP-growth claim**. All machine items are `humanApproved:false` (no SME fact/key review). Every verdict
+is stated **PASS-with-named-gaps**, never bare PASS. Cert/leak status is disclosed in metadata + a
+package note, never in a title a kid reads.
+
+**Approval gates (binding, throughout).** Nothing here writes to live TimeBack or to any repo without
+Stan's explicit OK. Every stage and fold that mutates live content (`--publish`, any `PUT`,
+`--repost-content`, `--apply`) is marked **[requires OK]**. "Done" = confirmed by an independent
+read-back or a deterministic verifier — never an agent's self-report, and never a bare HTTP 200 (a PUT
+can return 200 and silently revert).
+
+---
+
+## What this course is (so the steps make sense)
+
+One powerpath-100 course built by **merging two already-live G5 courses** — no rebuild, no re-authoring,
+no new items. The 772 items + 772 stimuli are read back verbatim from TimeBack; the merged course is a
+fresh skeleton that **references the existing live item ids**.
+
+| Unit | Source (live) | Items | Integrity |
+|---|---|---|---|
+| Unit 1 | `grade5-reading-clean-pp-9801` | 172 | cross-family blind-**certified** spine — *the bar* |
+| Unit 2 | `g5-reading-ela-pp-9801` | 600 | **uncertified, ~90% passage-leakable** — kept by explicit decision, flagged |
+| **Merged** | new `g5-reading-merged-pp-9802` | **772** | mixed — disclosed per unit |
+
+The merge changed only what was observably broken: it stamped `masteryThreshold=90` (both sources
+shipped `null`), restored passage rendering on the flattened stimuli, and gave learners kid-facing
+titles. Items, feedback wiring, and lesson grouping carry through verbatim.
+
+---
+
+## The 8-stage sequence
+
+Read-only stages run with zero approval. Live stages are marked **[requires OK]**.
+
+### Stage 1 — Read back both source courses (read-only)
+`g5-merged-course/merge_readback.py --discover --ela` pulls both live courses into
+`readback/`: `inventory.jsonl` (772 items: id, unit, lesson, test, stimulus-ref, ccss, difficulty),
+`items/*.xml`, `stimuli/*.xml` (verbatim live QTI), and `summary.json` (per-course counts — this is
+where you *see* the two defects: `ccss 0/772`, `masteryThreshold null` on both). This is the source of
+truth; everything downstream references it.
+
+### Stage 2 — Fix stimulus flattening (read-only, local)
+The live ELA stimuli were flattened at publish time (see [Gotcha 2](#g2-flatten)).
+`g5-merged-course/restore_stimuli.py` re-blocks each flattened stimulus from its authoritative local
+origin bundle (content-keyed on tag/whitespace-stripped alphanumeric), rebuilds pipe-tables as semantic
+`<table>`, and writes `readback/stimuli_restored/` + a manifest. **Fidelity guard:** a candidate is
+accepted only if its visible alphanumeric text is byte-identical to live — structure-only repair, never
+a word added or dropped. Run `--report-only` first to see what would change.
+
+### Stage 3 — Independently verify the restoration (read-only, local)
+`g5-merged-course/verify_restoration.py` re-checks every stimulus **without trusting the restorer's own
+manifest**: well-formed XML, intended-text fidelity, marker-free (no literal `###`/`**` leaked), weld
+count not grown, no new escaped-markup. It prints a `DETERMINISTIC VERDICT: PASS`. Do not proceed on the
+restorer's say-so; proceed on this independent verdict.
+
+### Stage 4 — Build the merge skeleton with `masteryThreshold=90` (read-only, local)
+`g5-merged-course/merge_publish.py --dry-run` builds the powerpath-100 skeleton that references the live
+item ids (`build_plan`), stamping `masteryThreshold=90` on all 81 resources (`merge_publish.py` line 308,
+the `<-- THE FIX`). `--mastery` defaults to 90; `--prefix` guards the sourcedId namespace. Dry-run makes
+zero network calls and emits `merge_plan_summary.json`. Confirm parity here before any live call.
+
+### Stage 5 — Publish **[requires OK]**
+After Stan's explicit push-OK:
+```
+python3 g5-merged-course/merge_publish.py \
+  --publish --org <ORG_SOURCEDID> \
+  [--repost-content]   # also re-push the 772 items+stimuli (POST 409=exists; PUT on 409 for changed stimuli)
+```
+`--repost-content` is how the restored stimulus XML reaches live: it pushes the corrected XML **directly**
+(bypassing the flattener) via `upsert_stimulus` = POST-then-PUT-on-409, updating **only** stimuli whose
+restored content differs from live. Every label should be 201-fresh / 409-resume, zero ERR.
+
+### Stage 6 — Derive kid-facing titles (read-only, local)
+`g5-merged-course/retitle/derive_titles.py` derives a clean learner-facing title per object: prefer a
+real passage heading (`<h1..h4>`/`<strong>`) that is **not** a question stem and **not** a structural
+label (`good_heading()` rejects both), else a deterministic prose topic from the first passage sentence;
+de-dup within a unit; narrative-only spine falls back to `"Reading Practice N"`. Writes a JSON map
+(`/tmp/g5_retitle_map.json` + `retitle/lesson_titles.json`) for human review. Cert/leak status does
+**not** go in a title — it goes to metadata + the package note (see [Gotcha 4](#g4-titles)).
+
+### Stage 7 — Apply titles via PUT **[requires OK]**
+After Stan reviews the JSON and gives apply-OK:
+`g5-merged-course/retitle/apply_titles.py --probe` first (reversible single-object PUT then restore — the
+proof that PUT works on this object type), then `--apply`. PUT updates the 5 title-bearing object types
+(course, unit `courseComponent`, lesson `courseComponent`, `component-resource`, `resource`) plus the QTI
+`assessment-test`. POST cannot do this (it 409-skips); see [Gotcha 1](#g1-put).
+
+### Stage 8 — QA read-back (read-only)
+Re-pull the live course and confirm the changes stuck: titles exact-match the approved map with zero
+jargon, restored stimuli show `<h3>`/`<p>`/`<table>` (no `PapyrusIn` weld, no double-escape),
+`masteryThreshold=90` on the resources. Write the verdict as **PASS-with-named-gaps**, carrying the
+[open gaps](#open-gaps-carried-forward) forward explicitly.
+
+---
+
+## Gotchas / hard-won lessons
+
+These are the six things that cost time the first time. Each is the durable form of a fix that is
+currently only worked around in a one-off script.
+
+### Gotcha 1 — live updates need PUT (POST cannot) {#g1-put}
+`push_to_timeback.post()` and the publish path **only POST**. A POST against an object that already
+exists returns **409** (or this OneRoster API's `404` + `"already exists"`) and the helper treats that as
+success and returns — *changing nothing* (`examples/push_to_timeback.py` line 19: *"Creates ONLY new
+entities … Never PUT/PATCH/DELETE"*; `post()` ~lines 123–154). **So the publish path can only CREATE; it
+cannot update already-live content** — not a flattened stimulus, not a title, not a metadata field.
+
+The update verb is **`PUT`**, verified live and reversibly (PUT to a new value, then PUT back):
+- `PUT /stimuli/{id}` replaces a live stimulus body. Reference: `merge_publish.py:upsert_stimulus`
+  (POST first; on 409, PUT).
+- `PUT` on the OneRoster title-bearing objects + the QTI `assessment-test`. Reference:
+  `retitle/apply_titles.py` (`put()`; reversible `--probe` prints `VERDICT: PUT WORKS …`).
+
+**Safe pattern (proven):** rebuild the canonical writable body from the *same shape the POST used* and
+swap only the changed field — **do NOT GET-modify-PUT** (the read-back can carry read-only fields the API
+rejects). Checkpoint per object, and reversible-probe one object before any bulk PUT. There is **no
+`put()`/`upsert()` in `push_to_timeback.py` today** — the logic lives in consumer one-offs
+(`merge_publish.upsert_stimulus`, `apply_titles.put`, a narrow precedent in `examples/prune_banks.py`).
+Folding it into the shared module is [Fold 2](#fold2).
+**Any actual PUT to live content requires Stan's explicit OK.**
+
+### Gotcha 2 — the stimulus flattener {#g2-flatten}
+The G3 publisher `examples/publish_powerpath.py:_txt_to_html` (~lines 164–168) splits on *every* newline
+(`re.split(r"\n\s*\n|\n", …)`) and `escape()`s everything, with **no HTML/markdown detection**. Structured
+source (single-line `<h3>…</h3><p>…</p>` HTML, `###`-markdown headings, or pipe-tables) collapses into one
+tagless `<p>`: titles weld onto bodies (`"PapyrusIn"`), one passage runs into the next
+(`"surface.Passage 2"`), table cells weld into one string. **This still-broken publisher is the one
+POWERPATH.md documents — a fresh G3 build re-flattens.**
+
+The fix exists only in the G5 fork: `examples/publish_powerpath_g5.py:_txt_to_html` (~lines 179–208) is
+structure-preserving — it passes already-structured HTML through verbatim (repairing only bare void tags)
+and converts `### Heading` → `<h3>`, `**x**` → bold. **Residual (open):** even the g5 renderer's
+pure-plain-text branch still splits on single newlines (line ~196), so a non-HTML/non-markdown passage can
+still lose intra-paragraph spacing. Not triggered by the current ELA source (HTML/markdown). The clean
+fix is a shared structure-preserving renderer both publishers delegate to —
+[Fold 1](#fold1).
+
+**Repairing already-live flattened stimuli:** you cannot fix a live stimulus by re-running the publisher
+(POST 409-skips). Push the corrected XML **directly** so it never re-enters the flattener — the Stage 2→3→5
+chain (`restore_stimuli.py` → `verify_restoration.py` → `merge_publish.py --repost-content`). **The repost
+is a live PUT and requires Stan's explicit OK.**
+
+### Gotcha 3 — `masteryThreshold` is part of the lesson shape
+Without `masteryThreshold` on the resource metadata, the powerpath-100 gate does **not** block learners
+scoring <90. Both live G5 source courses shipped `masteryThreshold: null` and so did not gate. **Neither
+publisher sets it today** (`publish_powerpath.py` resource metadata ~lines 391–393,
+`publish_powerpath_g5.py` ~lines 428–434 both omit the key). Stamp `masteryThreshold: 90` into the
+resource / component-resource metadata exactly as `merge_publish.py` line 308 does (`<-- THE FIX`). A
+course already live with `null` needs a **PUT backfill** to enable the gate retroactively (Gotcha 1).
+Making this a first-class publish option is [Fold 4](#fold4).
+
+### Gotcha 4 — kid-facing titles {#g4-titles}
+The title a student reads (course, unit `courseComponent`, lesson `courseComponent`, `component-resource`)
+must be a clean passage-derived name. **Never** ship cert/QA status (`"Verified · Lesson N"`, `"Unit 1 —
+Verified: cross-family blind-certified"`), question stems, or structural labels (`"Panel 1"`, `"Figure 2"`,
+`"Table 3"`, `"Step N"`) as a title — the live G5 UI showed exactly this jargon to students until it was
+re-titled. Cert / leak / integrity disclosure goes to **unit `certStatus` + course `integrity` metadata +
+`PACKAGE_NOTE`**, never a kid-facing title. Derivation rules live in `retitle/derive_titles.py` (heading-
+or-prose, fail-closed against questions and structural labels); `merge_publish.py` is regression-proofed
+(`UNIT_TITLES`, `_LESSON_TITLES` loader, `--title` default) so a fresh `--publish` won't re-leak jargon.
+**The publishers have no such defense today** — they stamp the source title verbatim. Folding the deriver
++ a build-time guard into the packager is [Fold 3](#fold3).
+
+### Gotcha 5 — CCSS can be entirely absent, and codes are never fabricated
+All 772 G5 items carry **no CCSS** — in OneRoster metadata **and** in the QTI XML, on both source courses.
+The merged course inherits this, so `audit_compliance.py` (which hard-fails on missing CCSS) will still
+flag it live. The README note that "standards don't serialise" is about the legacy **alpha-read-article**
+surface; on **powerpath-100** the child-ALI **can** carry CCSS as a `learningObjectiveSet` *when a map
+exists*. `merge_publish.py --ccss-map` backfills from a *supplied human-authored* `{item_id:[codes]}` map,
+else omits + **reports** the gap. **Honesty constraint (binding): never fabricate or guess a CCSS code** —
+backfill only from a human-authored map, and report coverage truthfully. Folding this hook into the
+publisher is [Fold 5](#fold5).
+
+### Gotcha 6 — verify independently, and disclose the fallback
+Two trust rules earned the right verdict. (a) The restoration verifier (`verify_restoration.py`) does
+**not** trust the restorer's manifest — it re-derives every check. (b) **35 of 772 stimuli** use a
+structure-preserving *fallback* restore (regenerated ELA variants with no authoritative local origin):
+their welds reduced and fidelity held, but absent an origin they cannot be *confirmed* run-on-free, so
+they are **flagged, not asserted clean**. The general rule: a number ships only with the verification that
+earned it, and anything heuristic is disclosed as heuristic.
+
+---
+
+## Live-write checklist (before any [requires OK] step)
+
+1. **Explicit OK in hand** for this specific action (push / PUT / repost / apply). Approval of one step is
+   not approval of the next.
+2. **Dry-run / `--report-only` first**, parity confirmed, zero malformed.
+3. **Reversible `--probe`** one object (PUT to new value → PUT back) before any bulk PUT.
+4. **Canonical writable body**, not GET-modify-PUT (read-only fields get rejected).
+5. **Checkpoint per object** so a partial run resumes, not restarts.
+6. **Independent read-back** confirms the change stuck — not a bare 200.
+7. **Credentials env-var only** (`TIMEBACK_SSO_CLIENT_ID` / `_SECRET`); never echoed, logged, written to a
+   file, or committed.
+8. **Verdict = PASS-with-named-gaps**, gaps carried forward.
+
+---
+
+## Open gaps (carried forward)
+
+Flagged, not faked — these are true of the merged course as built (2026-06-26):
+
+1. **CCSS absent on all 772 items** (OneRoster metadata + QTI XML, both sources). Live audit will flag it
+   until backfilled from a human-authored map (Gotcha 5). Sourcing each item's standard via positional
+   join against local origin bundles is a follow-up, not done.
+2. **Unit-2 graft is uncertified + ~90% passage-leakable** — never re-gated by a cross-family blind solver.
+   Kept by explicit richness-over-re-gating decision, disclosed in unit + course metadata + `PACKAGE_NOTE`.
+   `GENERATOR_DIRECTIVE.md` queues replacement; **no runnable cross-family solver is checked in** — that is
+   the single unlock.
+3. **`humanApproved` unset (treat as false)** on all 772 items; no SME fact/key review. No RIT / "proven" /
+   MAP-growth claim (MAP 0/313).
+4. **35 stimuli use a fallback restore** with no authoritative origin — flagged, not asserted clean
+   (Gotcha 6).
+5. **Publisher plain-text residual** — `publish_powerpath_g5._txt_to_html` line ~196 still splits on single
+   newlines for non-HTML/non-markdown input. Not triggered by the current HTML/markdown ELA source; low-risk
+   but un-fixed (Fold 1 closes it).
+6. **Live gates not run** — live QTI scoring + a live `audit_compliance` run are post-publish only and
+   require Stan's push-OK. The merged course is import-ready, not live-verified for scoring as of the
+   package note.
+7. **No generic update verb in the reusable layer** — `push_to_timeback.py` is POST-only; PUT-on-409 lives
+   in consumer scripts (Fold 2 fixes this).
+8. **Cross-unit Lexile ramp not re-evaluated** for the merged skeleton (the V2 skeleton historically ran
+   flat ~900–913L, organized by CCSS domain not difficulty). If an 830→1010L ramp is a hard requirement,
+   the units need reorganizing by Lexile band.
+
+---
+
+## Appendix — fold the one-offs back into the packager {#appendix}
+
+The Stage scripts above live under `artifacts/g5-merged-course/` as consumer one-offs. To streamline the
+**next** build, fold their durable logic into the reusable layer. **This appendix is a proposal — nothing
+here was edited, committed, pushed, or PUT.** Recommended order is low-risk-first; do **not** do all five at
+once.
+
+**Test-suite note:** the suite is **149 test functions** across `tests/test_*.py`; **none** import
+`publish_powerpath*` / `push_to_timeback` / `merge_publish` (grep-clean), and `conftest.py` wires only
+`src/` onto `sys.path`. So adding new `src/arpack.py` functions and publisher options is **test-additive** —
+zero risk to the existing 149 — provided existing arpack functions are not edited in place.
+
+### Fold 1 — shared structure-preserving `passage_blocks` renderer {#fold1}
+**Target:** promote the heavy reconstruction into a new `src/arpack.py:passage_blocks(src)` (beside
+`from_qti_stimulus_xml`), and have both `publish_powerpath_g5._txt_to_html` **and** the still-broken
+`publish_powerpath._txt_to_html` delegate to it. **Risk: low · effort: M.** Lift `md_table` /
+`html_to_blocks` / the byte-identical fidelity guard from `restore_stimuli.py`; fix the plain-text branch
+to split paragraphs on blank lines only (`\n\s*\n`) and join soft-wrapped lines within a block. **Net:** a
+fresh build emits well-blocked passages directly, so `restore_stimuli.py` + `verify_restoration.py` are no
+longer needed to repair *newly-published* content (they remain only for already-live flattened stimuli,
+which need PUT). Also fixes the G3 publisher, which still re-leaks the flatten bug. Add a fixture test:
+single-line HTML / `###`-markdown / pipe-table in → multi-block HTML out, no weld, table → `<table>`.
+
+### Fold 2 [requires OK] — a guarded PUT/upsert verb in `push_to_timeback` {#fold2}
+**Target:** new `P.put(...)` mirroring `post()`'s exact checkpoint/retry/return contract but `method='PUT'`,
+plus `P.upsert(url_create, url_update, …)` = POST-then-PUT-on-409. **Risk: med · effort: M.** Template is
+`merge_publish.upsert_stimulus`. Collapse the three current one-offs onto it (`upsert_stimulus`,
+`apply_titles.put` across 5 object types, the `prune_banks.py` precedent). **Guard hard:** keep the existing
+draft/prefix gates **and** require a new `--allow-update` flag, and ship a mandatory reversible `--probe`
+(single-object PUT then restore) as a pre-flight before any bulk PUT. This is a **LIVE-MUTATION
+capability** — adding it to the shared module requires Stan's explicit OK, and any actual PUT run requires
+Stan's per-run OK. Highest-leverage fold (it's what lets the publisher fix *already-live* content), but the
+most gated.
+
+### Fold 3 — `arpack.derive_title` + a fail-closed build-time guard {#fold3}
+**Target:** new `src/arpack.py:derive_title(stimulus_html) -> (title, confidence, how)`, called from both
+publishers' `build_plan` title sites. **Risk: low · effort: M.** Lift `derive_titles.py`'s pure heuristics
+(heading-or-prose, with `good_heading()` rejecting question stems and structural labels). Add a fail-closed
+build-time guard (mirroring arpack's existing answer-key guard) that **rejects** any title that is a
+question stem or structural label, so QA jargon can never reach a learner title. `arpack._first_heading` /
+`from_qti_stimulus_xml` are natural seams. **Fold only the pure derivation** — the live `apply_titles.py` is
+coupled to the consumer and its apply step is a live PUT (Fold 2). Deriver proposes → JSON human-reviewed →
+apply on explicit OK; never auto-title live.
+
+### Fold 4 — `masteryThreshold` a first-class option defaulting to 90 {#fold4}
+**Target:** add `--mastery-threshold` (default 90; `0`/`none` to omit) to both publishers' `main()`, and
+inject `masteryThreshold` into the resource metadata exactly as `merge_publish.py` line 308 does. **Risk:
+low · effort: S — lowest-effort, highest-safety fold.** Makes a fresh build strictly *more* compliant than
+the originals on the gate axis. (Live courses already shipped `null` still need a PUT backfill via Fold 2 to
+enable the gate retroactively — that PUT requires Stan's OK.) **Land this first.**
+
+### Fold 5 [deferred] — `--ccss-map` backfill that always reports coverage {#fold5}
+**Target:** add `--ccss-map` + a child-ALI `learningObjectiveSet` writer to both publishers, mirroring
+`merge_publish.py`. **Risk: med (honesty, not code) · effort: M.** Accept a human-authored `{item_id:[codes]}`
+map; when present write `learningObjectiveSet=[{source:'CASE', learningObjectiveIds: codes}]`; **always**
+print a truthful coverage report (N/total aligned). **Binding honesty constraint: never fabricate or guess
+codes** — backfill only from a supplied map, leave **OFF by default** (omit + report "pre-existing gap —
+flagged") until a real map exists. Most deferrable: no CCSS map is checked in today, and the risk is a false
+*standards-alignment* claim, not a code break.
+
+### Recommended order
+1. **Fold 4** — masteryThreshold default 90 (S, output-only, lowest risk).
+2. **Fold 1** — shared `passage_blocks` renderer (M; retires the restore one-offs for new builds; also fixes
+   the G3 publisher).
+3. **Fold 3** — `derive_title` + fail-closed guard (M; propose-then-approve).
+4. **Fold 2 [requires OK]** — `P.put`/`P.upsert` behind `--allow-update` + reversible `--probe` (M;
+   LIVE-MUTATION).
+5. **Fold 5 [deferred]** — `--ccss-map` backfill (M; OFF by default, gated on a real human-authored map).
+
+**Bottom line.** Land the safe batch (4, 1, 3) and the next G5 build needs no `restore` / `retitle` /
+`mastery` one-offs at all. Then Fold 2 under explicit approval as the reusable live-update verb. Then Fold 5
+when a CCSS map exists. Stage it; this is a proposal, and every live / PUT / `--publish` / `--apply` /
+`--repost-content` step requires Stan's explicit OK.
